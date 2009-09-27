@@ -1,0 +1,272 @@
+/////
+vim:set ts=4 sw=4 syntax=asciidoc noet:
+/////
+aurman(8)
+=========
+
+Name
+----
+aurman - more than a frontend to pacman
+
+
+Synopsis
+--------
+aurman <operation> [options] [packages]
+
+
+EXAMPLES
+       aurman pm -S packagename
+              download package from repository, and fallback on AUR
+
+       aurman am --vote package(s)
+              Vote for the desired package(s)
+
+
+DESCRIPTION
+       aurman is a pacman frontend that adds a lot of features like:
+
+       - AUR support (search, easy install, (un)vote, (un)flag, (un)notify, comment, pkgsubmit etc..)
+
+       - interactiv search + install (with AUR Unsupported results integrated)
+
+       - downloading PKGBUILD directly from AUR Unsupported
+
+       - statistics on installed packages
+
+       - etc...
+
+
+       aurman can be run as a non-privileged user (safest for AUR unsupported packages).
+
+
+OPERATIONS
+       aurman's options are the same as pacman's, so check the pacman man page for more info
+
+       options unique to aurman are marked by a *
+
+       -B, --backup [/where/you/want]
+              Save pacman database in specified directory. If no directory is specified, aurman use the current directory.
+
+       -B, --backup [file.tar.bz2]
+              Restore  a  previous backup of the pacman database. Yaourt analyse the backup first and shows the differences
+              with the current alpm db. You have to type "yes" to replace the database by the old one. Actual  database  is
+              automatically saved in /tmp/ folder.
+
+       -C, --clean
+              Perform cleaning operations on the package cache, databases and  configuration files
+
+       -Q, --query
+              Query  the package database. This operation allows you to view installed packages and their files, as well as
+              meta-information about individual packages (dependencies, conflicts, install date, build  date,  size).  This
+              can  be  run  against  the  local  package  database or can be used on individual .tar.gz packages. See QUERY
+              OPTIONS below.
+
+       -R, --remove
+              Remove a package from the system. Files belonging to the specified package will be deleted, and the  database
+              will  be updated. Most configuration files will be saved with a .pacsave extension unless the --nosave option
+              is used. See REMOVE OPTIONS below.
+
+       -S, --sync
+              Synchronize packages. Packages are installed directly  from  the  ftp  servers,  including  all  dependencies
+              required  to run the packages. For example, aurman -S qt will download and install qt and all the packages it
+              depends on. You can also use aurman -Su to upgrade all packages that are out of date. See SYNC OPTIONS below.
+
+       -U, --upgrade
+              Upgrade or add a package to the system. Either a URL or file path can be specified. This is  a  "remove-then-
+              add" process. See HANDLING CONFIG FILES for an explanation on how pacman takes care of config files.
+
+       -h, --help
+              print this help
+
+       -V, --version
+              output program version
+
+
+OPTIONS
+       --noconfirm
+              do not ask for any confirmation
+
+
+INSTALL OPTIONS
+       -S, --sync package *
+              download package from repository, and fallback on aur
+       -b *   builds the targets from source
+
+       -c, --clean
+              remove old packages from cache directory (use -cc for all)
+
+       -d, --nodeps
+              skip dependency checks
+
+        --asdeps
+              Install packages non-explicitly; in other works, fake their install reason to be installed as a dependency.
+
+        --ignorearch
+              Ignore incomplete arch field in PKGBUILD.
+
+       -f, --force
+              force install, overwrite conflicting files
+
+       -g, --groups
+              view all members of a package group
+
+       -i, --info *
+              view package (or PKGBUILD from AUR Unsupported) information
+
+       -l, --list *
+              list all packages belonging to the specified repository
+
+       -p, --print-uris
+              print out download URIs for each package to be installed
+
+       --export destdir *
+              export packages and PKGBUILD for local repository
+
+       --ignore package
+              skip some package
+
+       -U file
+              upgrade a package from <file>
+
+
+
+UPGRADE OPTIONS
+       --sysupgrade
+              upgrade all packages that are out of date
+
+       -d, --nodeps
+              skip dependency checks
+
+       -f, --force
+              force install, overwrite conflicting files
+
+       --ignore package
+              skip some package
+
+       -y, --refresh
+              download fresh package databases from the server
+
+       Note: aurman always shows new orphans after package update
+
+
+
+DOWNGRADE OPTIONS
+       -Su --downgrade
+              reinstall  all  packages  which are marked as "newer than extra or core" in -Su output (this is specially for
+              users who experience problems with [testing] and want to revert back to current)
+
+
+
+QUERY OPTIONS
+       -c, --changelog
+              View the ChangeLog of a package. (not every package will provide one)
+
+       -d, --deps
+              list all packages installed as dependencies. This option can be combined with -t  for  listing  real  orphans
+              packages  that  were installed as dependencies but are no longer required by any installed package.  (-Qdt is
+              equivalent to the aurman 0.8.1X -Qt option)
+
+       -e, --explicit
+              list all packages explicitly installed. This option can be combined with -t  to  list  -top  level  packages-
+              those packages that were explicitly installed but are not requierd by any other package.
+
+       -g, --groups
+              view all members of a package group
+
+       -i, --info
+              view package information (use -ii for more)
+
+       -l, --list
+              list the contents of the queried package
+
+       -o string *
+              search for package that owns <file> or <command>
+
+       -p, --file
+              query the package file [package] instead of looking in the database
+
+       -s, --search *
+              search locally-installed packages for matching strings
+
+        --backupfile *
+              Query a database previously saved in a tar.bz2 file (with aurman --backup).
+
+       Example: you want to reinstall archlinux with the same packages as your backup "pacman-2008-02-22_10h12.tar.bz2"
+
+       just run aurman -Qet --backupfile pacman-2008-02-22_10h12.tar.bz2 > TopLevelPackages.txt
+
+       To reinstall later, just run aurman -S TopLevelPackages.txt
+
+        --date
+              list last installed packages, ordered by install date
+
+
+
+       REMOTE QUERY OPTIONS
+
+       -s string *
+              search remote repositories and AUR Unsupported for matching strings
+
+       --depends package *
+              list all packages which depends on specified package
+
+       --conflicts package *
+              list all packages which conflicts with specified package
+
+       --provides package *
+              list all packages which provides specified package
+
+
+CLEANING OPTIONS
+       -c *   delete all .pacsave/.pacnew files
+
+       d, --database *
+              clean database (show obsolete repositories)
+
+
+REMOVE OPTIONS
+       -c, --cascade
+              remove packages and all packages that depend on them
+
+       -d, --nodeps
+              skip dependency checks
+
+       -k, --dbonly
+              only remove database entry, do not remove files
+
+       -n, --nosave
+              remove configuration files as well
+
+       -s, --recursive
+              remove dependencies also (that won't break packages)
+
+       Note: aurman always shows new orphans after package removal
+
+
+CONFIGURATION
+       Runing aurman as a non-privileged user requires some entries in sudoers file:
+         - pacman (remove package + refresh database + install AUR's package)
+
+
+SEE ALSO
+       aurmanrc(5), pacman(8), makepkg(8)
+
+       See the berlios developer website at <http://developer.berlios.de/projects/> for more current information about aur‐
+       man.
+
+       See the Arch Linux website at <http://www.archlinux.org> for more current information on the  distribution  and  the
+       pacman family of tools.
+
+
+
+AUTHORS
+       Laszlo Papp <djszapi@archlinux.us>
+
+
+MANPAGE AUTHORS
+       Laszlo Papp  <djszapi@archlinux.us>
+
+
+
+                                                     September 27, 2009                                           aurman(8)
+

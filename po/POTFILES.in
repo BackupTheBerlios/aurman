@@ -1,0 +1,6 @@
+# List of source files with translatable strings
+
+# pacman frontend source files
+src/aurman/aurman.c
+
+# scripts with gettext translations

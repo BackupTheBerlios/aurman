@@ -1,0 +1,144 @@
+Pacman - Translating
+====================
+
+This document is here to guide you in helping translate aurman messages,
+and the manpages for the entire aurman package.
+
+A quick note- the gettext website is a very useful guide to read before
+embarking on translation work, as it describes many of the commands in more
+detail than I will here:
+http://www.gnu.org/software/gettext/manual/html_node/gettext.html[]
+
+In addition, this site presents a small tutorial that I found useful:
+http://oriya.sarovar.org/docs/gettext/[]
+
+
+Translating Messages
+--------------------
+
+Overview
+~~~~~~~~
+
+There are one message catalogs in aurman- for the frontend (aurman and scripts).
+These correspond to `po` directories in the aurman source, respectively.
+
+Translation message files are a specially formatted text file containing the
+original message and the corresponding translation. These po files can then
+either be hand edited, or modified with a tool such as poedit, gtranslator or
+kbabel. Using a translation tool tends to make the job easier.
+
+See the <<Notes,Notes>> section for additional hints on translating.
+
+Pre-release Updates
+~~~~~~~~~~~~~~~~~~~
+
+A week or two before each release, the codebase will go into a string freeze
+and an email will be sent by the 'translation lieutenant' to the
+mailto:arch-general@archlinux.org[arch-general] mailing list asking for
+translations. This email will have a prefix of *[translation]* for anyone
+looking to set up an email filter.
+
+At this time, the `.po` language files will be made available at a URL
+specified in the email. Each language will have two files available (backend
+and frontend). Translators interested in helping are encouraged to send a
+follow-up message to the mailing list stating exactly what they intend to
+translate so efforts are not duplicated on the same language.
+
+Once a translator has completed the translation (*OR* realizes they do not have
+time to finish), please email the `.po` files back to the list with a subject
+such as '[translation] Updated German translation'. At this point, the
+'translation lieutenant' will gather the translations together for inclusion in
+the upcoming release.
+
+NOTE: Please email your translations back to the list as soon as possible- this
+will give other speakers of your language time to review your translations and
+update them as necessary.
+
+For those familiar with GIT, you may wish to follow the procedure outlined
+below as another alternative.
+
+Incremental Updates
+~~~~~~~~~~~~~~~~~~~
+
+If you have more advanced needs you will have to get a copy of the aurman
+repository.
+
+    git clone git://developer.berlios.de/aurman.git aurman
+
+Next, you will need to run `./autogen.sh` and `./configure` in the base
+directory to generate the correct Makefiles. At this point, all necessary
+make targets will be generated and we can begin updating the translation
+files.
+
+We need to first update the main message catalog file. Navigate into the `po`
+directory and execute the following command:
+
+    make aurman.pot-update
+
+Next, update your specific language's translation file:
+
+    make <po file>-update
+
+At this point, you can do the translation. To submit your changes, either email
+the new `.po` file to the mailing-list with *[translation]* in the subject, or
+submit a GIT-formatted patch (please do not include any `.pot` file changes).
+
+As a shortcut, all translation files (including `.pot` files) can be updated
+with the following command:
+
+    make update-po
+
+Adding a New Language
+~~~~~~~~~~~~~~~~~~~~~
+
+Making a new language is not too hard, but be sure to follow all the steps.
+You will have to do the following steps in the `po/` directories, substituting
+where appropriate. First, edit the `LINGUAS` file and add your new language
+code at the bottom. Next, run the following command, substituting 'aurman.pot':
+
+	msginit -l <lang code> -o <lang code>.po -i <potfile>
+
+You can then also add your language code to the end of the `LINGUAS` file
+located in each po directory.
+
+Look at the current message files for more guidance if necessary. Once you
+create the new language file, you may need to slightly modify the headers;
+try to make them look similar to the other .po file headers. In addition, for
+all new translations we would strongly recommend using UTF-8 encoding.
+
+Notes[[Notes]]
+~~~~~~~~~~~~~~
+
+msgid and msgstr 'variables' can be on as many lines as necessary. Line breaks
+are ignored- if you need a literal line break, use an `\n` in your string. The
+following two translations are equivalent:
+
+    msgstr "This is a test translation"
+
+    msgstr ""
+    "This is a test translation"
+
+If you want to test the translation (for example, the frontend one):
+
+    rm *.gmo stamp-po
+    make
+    cp <lang code>.gmo /usr/share/locale/<lang code>/LC_MESSAGES/pacman.mo
+
+
+Translating Manpages
+--------------------
+
+There are currently no efforts underway to include translated manpages in the
+aurman codebase. However, this is not to say translations are unwelcome. If
+someone has experience with i18n manpages and how to best include them with our
+source, please contact arch-general mailing list at
+mailto:arch-general@archlinux.org[].
+
+Some community efforts have been made to translate manpages, and these can be
+found in the link:http://aur.archlinux.org[AUR] (Arch User Repository). Please
+check there first before undergoing a translation effort to ensure you are not
+duplicating efforts.
+
+/////
+vim: set ts=2 sw=2 syntax=asciidoc et:
+/////

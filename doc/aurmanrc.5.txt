@@ -1,0 +1,57 @@
+/////
+vim:set ts=4 sw=4 syntax=asciidoc noet:
+/////
+aurmanrc(5)
+============
+
+Name
+----
+aurmanrc - aurman package manager configuration file
+
+Synopsis
+--------
+/home/user/.aurmanrc
+
+
+Description
+-----------
+       aurman(8) obtains configuration data from the following sources in the following order:
+
+           1.   command-line options
+
+           2.   user's configuration file (~/.aurmanrc)
+
+
+       user
+         Username of the desired user with whose account you would like to take the operations.
+
+       pass
+         Password of the desired user with whose account you would like to the operations.
+
+       download
+         Download location to where to download the AUR package(s).
+
+
+SEE ALSO
+       aurman(8) pacman(8),
+
+       See  the  berlios  developer  website  at <http://developer.berlios.de/projects/aurman> for more current information
+       about aurman.
+
+       See the Arch Linux website at <http://www.archlinux.org> for more current information on the  distribution  and  the
+       pacman family of tools.
+
+
+
+AUTHORS
+       Laszlo Papp <djszapi@archlinux.us>
+       Lajos Kovacs <klajos@archlinux.us>
+
+MANPAGE AUTHORS
+       Laszlo Papp  <djszapi@archlinux.us>
+
+
+
+                                                     September 27, 2009                                         aurmanrc(5)
+
+

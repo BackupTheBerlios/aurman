@@ -1,0 +1,159 @@
+Aurman Home Page
+================
+
+A simple library-based package manager.
+
+Introduction
+------------
+aurman is a utility which manages software packages in Linux. It uses simple
+compressed files as a package format, and maintains a text-based package
+database (more of a hierarchy), just in case some hand tweaking is necessary.
+
+aurman does not strive to "do everything." It will add, remove and upgrade
+packages in the system, and it will allow you to query the package database for
+installed packages, files and owners. It also attempts to handle dependencies
+automatically and can download packages from a remote server.
+
+History
+~~~~~~~
+Version 1.0 of aurman is the initial release.
+
+Documentation
+-------------
+
+Please see the ./doc directory and manpages, -h/--help option
+
+Manpages
+~~~~~~~~
+There are several manpages available for the programs, utilities, and
+configuration files dealing with pacman.
+
+* linkman:PKGBUILD[5]
+* linkman:libalpm[3]
+* linkman:makepkg[8]
+* linkman:makepkg.conf[5]
+* linkman:pacman[8]
+* linkman:pacman.conf[5]
+* linkman:repo-add[8]
+* linkman:aurman[8]
+* linkman:aurmanrc[5]
+
+Changelog
+~~~~~~~~~
+For a good idea of what is going on in aurman development, take a look at the
+link:http://developer.berlios.de/projects/aurman[Gitweb] summary
+page for the project.
+
+See the most recent
+link:http://developer.berlios.de/projects/aurman[NEWS]
+file for a not-as-frequently-updated list of changes. However, this should
+contain the biggest changes in a format more concise than the commit log.
+
+
+Releases
+--------
+
+`------------`-------
+Date         Version
+---------------------
+2009-09-27   v1.0
+---------------------
+
+Source code for all releases is available at
+link:http://developer.berlios.de/projects/aurman/[]. To install, download
+the newest available source tarball, unpack it in a directory, and run the
+two magic commands:
+
+    $ make
+    # make install
+
+Development
+-----------
+
+Mailing List
+~~~~~~~~~~~~
+There isn't official mailing list devoted to aurman development, hosted by
+Arch Linux.
+
+Source Code
+~~~~~~~~~~~
+Development of aurman is currently done in GIT. The central repository is
+hosted by berlios, although some of the developers have their own trees (ask
+on the above mailing lists if you are interested in finding the locations of
+these trees).
+
+The current development tree can be fetched with the following command:
+
+    git clone git://developer.berlios.de/projects/aurman.git pacman
+
+which will fetch the full development history into a directory named aurman.
+You can browse the source as well using
+link:http://developer.berlios.de/projects/aurman[Gitweb].
+
+If you are interested in hacking on aurman, it is highly recommended you join
+the mailing list mentioned above, as well as take a quick glance at our
+link:HACKING.html[HACKING] document.
+link:submitting-patches.html[submitting-patches] is also a recommended read.
+
+Not as familiar with code as you'd like to be, but still want to help out? If
+you speak a foreign language, you can help by either creating or updating a
+translation file for your native language. Instructions can be found in
+link:translation-help.html[translation-help].
+
+Other Utilities
+~~~~~~~~~~~~~~~
+Although the package manager itself is quite simple, many scripts have been
+developed that help automate building and installing packages. These are used
+extensively in link:http://archlinux.org[Arch Linux]. Most of these utilities
+are available in the Arch Linux projects
+link:http://projects.archlinux.org/[Gitweb browser].
+
+Utilities available:
+
+* link:http://projects.archlinux.org/?p=abs.git[abs] - ABS (Arch Build System), scripts to download  & use the Arch Linux PKGBUILD tree
+* link:http://projects.archlinux.org/?p=devtools.git[devtools] - tools to assist in packaging and dependency checking
+* link:http://projects.archlinux.org/?p=namcap.git[namcap] - a package analysis utility written in python
+* link:http://projects.archlinux.org/?p=pacbuild.git[pacbuild] - a package building system utilizing a daemon
+* link:http://projects.archlinux.org/?p=srcpac.git[srcpac] - a bash build-from-source pacman wrapper
+
+Bugs
+----
+If you find bugs (which is quite likely), please email them to the arch-general
+mailing last at mailto:arch-general@archlinux.org[] with specific information
+such as your commandline, the nature of the bug, and even the package database
+if it helps.
+
+You can also post a bug to the Archlinux bug tracker
+link:http://bugs.archlinux.org/index.php?project=3[Flyspray]. Be sure to file
+bugs under the Pacman project.
+
+Aurman/libalpm in the Wild
+--------------------------
+Although Arch Linux is the primary user of aurman and libalpm, other
+distributions and projects also use pacman as a package management tool. In
+addition, there have been several projects started to provide a frontend GUI to
+aurman and/or libalpm.
+
+Arch derivatives:
+
+* link:http://archie.dotsrc.org/[Archie] - Arch Live on steroids
+* link:http://www.faunos.com/[FaunOS] - A portable, fully integrated operating system based on Arch Linux
+* link:http://larch.berlios.de/[larch] - A live CD/DVD/USB-stick construction kit for Arch Linux
+
+Other distributions:
+
+* link:http://www.delilinux.org/[DeLi Linux] - "Desktop Light" Linux, a Linux distribution for old computers
+* link:http://www.frugalware.org/[Frugalware Linux] - A general purpose Linux distribution for intermediate users (pacman is forked and maintained separately)
+
+Aurman/libalpm frontends:
+
+* link:http://shaman.iskrembilen.com/[Shaman] - A GUI frontend using Qt and libalpm
+
+Copyright
+---------
+aurman is Copyright (C) 2009 Laszlo Papp <djszapi@archlinux.us> and is licensed
+through the GNU General Public License, version 2 or later.
+
+/////
+vim: set ts=2 sw=2 syntax=asciidoc et:
+/////
