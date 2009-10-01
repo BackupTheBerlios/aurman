@@ -23,9 +23,10 @@ DEFS += -DGIT_VERSION=\"$(GIT_VERSION)\"
 endif
 
 aurman_SOURCES = \
-	conf.h \
+	conf.h conf.c \
 	aurman.h aurman.c \
-	util.h
+	util.h util.c
+
 
 ## LDADD = $(LTLIBINTL) $(top_builddir)/lib/libalpm/.libs/libalpm.la
 

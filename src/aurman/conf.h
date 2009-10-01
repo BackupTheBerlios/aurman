@@ -60,6 +60,11 @@ typedef struct __config_t {
 	unsigned short op_s_upgrade;
 	unsigned short op_s_printuris;
 
+	unsigned short am_downloadonly;
+	unsigned short am_pkgsubmit;
+	unsigned short am_comment;
+	unsigned short am_newpackages;
+
 	unsigned short group;
 	pmtransflag_t flags;
 	unsigned short noask;

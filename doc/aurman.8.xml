@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<refentry>
+<refentryinfo>
+</refentryinfo>
+<refmeta>
+<refentrytitle>aurman</refentrytitle>
+<manvolnum>8</manvolnum>
+<refmiscinfo class="source">Pacman</refmiscinfo>
+<refmiscinfo class="manual">Pacman Manual</refmiscinfo>
+</refmeta>
+<refnamediv>
+  <refname>aurman</refname>
+  <refpurpose>more than a frontend to pacman</refpurpose>
+</refnamediv>
+<refsynopsisdiv id="_synopsis">
+<simpara>aurman &lt;operation&gt; [options] [packages]</simpara>
+<simpara>EXAMPLES
+       aurman pm -S packagename
+              download package from repository, and fallback on AUR</simpara>
+<literallayout class="monospaced">aurman am --vote package(s)
+       Vote for the desired package(s)</literallayout>
+<simpara>DESCRIPTION
+       aurman is a pacman frontend that adds a lot of features like:</simpara>
+<itemizedlist>
+<listitem>
+<simpara>
+AUR support (search, easy install, (un)vote, (un)flag, (un)notify, comment, pkgsubmit etc..)
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+interactiv search + install (with AUR Unsupported results integrated)
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+downloading PKGBUILD directly from AUR Unsupported
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+statistics on installed packages
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+etc&#8230;
+</simpara>
+<literallayout class="monospaced">aurman can be run as a non-privileged user (safest for AUR unsupported packages).</literallayout>
+</listitem>
+</itemizedlist>
+<simpara>OPERATIONS
+       aurman&#8217;s options are the same as pacman&#8217;s, so check the pacman man page for more info</simpara>
+<literallayout class="monospaced">options unique to aurman are marked by a *</literallayout>
+<literallayout class="monospaced">-B, --backup [/where/you/want]
+       Save pacman database in specified directory. If no directory is specified, aurman use the current directory.</literallayout>
+<literallayout class="monospaced">-B, --backup [file.tar.bz2]
+       Restore  a  previous backup of the pacman database. Yaourt analyse the backup first and shows the differences
+       with the current alpm db. You have to type "yes" to replace the database by the old one. Actual  database  is
+       automatically saved in /tmp/ folder.</literallayout>
+<literallayout class="monospaced">-C, --clean
+       Perform cleaning operations on the package cache, databases and  configuration files</literallayout>
+<literallayout class="monospaced">-Q, --query
+       Query  the package database. This operation allows you to view installed packages and their files, as well as
+       meta-information about individual packages (dependencies, conflicts, install date, build  date,  size).  This
+       can  be  run  against  the  local  package  database or can be used on individual .tar.gz packages. See QUERY
+       OPTIONS below.</literallayout>
+<literallayout class="monospaced">-R, --remove
+       Remove a package from the system. Files belonging to the specified package will be deleted, and the  database
+       will  be updated. Most configuration files will be saved with a .pacsave extension unless the --nosave option
+       is used. See REMOVE OPTIONS below.</literallayout>
+<literallayout class="monospaced">-S, --sync
+       Synchronize packages. Packages are installed directly  from  the  ftp  servers,  including  all  dependencies
+       required  to run the packages. For example, aurman -S qt will download and install qt and all the packages it
+       depends on. You can also use aurman -Su to upgrade all packages that are out of date. See SYNC OPTIONS below.</literallayout>
+<literallayout class="monospaced">-U, --upgrade
+       Upgrade or add a package to the system. Either a URL or file path can be specified. This is  a  "remove-then-
+       add" process. See HANDLING CONFIG FILES for an explanation on how pacman takes care of config files.</literallayout>
+<literallayout class="monospaced">-h, --help
+       print this help</literallayout>
+<literallayout class="monospaced">-V, --version
+       output program version</literallayout>
+<simpara>OPTIONS
+       --noconfirm
+              do not ask for any confirmation</simpara>
+<simpara>INSTALL OPTIONS
+       -S, --sync package *
+              download package from repository, and fallback on aur
+       -b *   builds the targets from source</simpara>
+<literallayout class="monospaced">-c, --clean
+       remove old packages from cache directory (use -cc for all)</literallayout>
+<literallayout class="monospaced">-d, --nodeps
+       skip dependency checks</literallayout>
+<literallayout class="monospaced">--asdeps
+      Install packages non-explicitly; in other works, fake their install reason to be installed as a dependency.</literallayout>
+<literallayout class="monospaced">--ignorearch
+      Ignore incomplete arch field in PKGBUILD.</literallayout>
+<literallayout class="monospaced">-f, --force
+       force install, overwrite conflicting files</literallayout>
+<literallayout class="monospaced">-g, --groups
+       view all members of a package group</literallayout>
+<literallayout class="monospaced">-i, --info *
+       view package (or PKGBUILD from AUR Unsupported) information</literallayout>
+<literallayout class="monospaced">-l, --list *
+       list all packages belonging to the specified repository</literallayout>
+<literallayout class="monospaced">-p, --print-uris
+       print out download URIs for each package to be installed</literallayout>
+<literallayout class="monospaced">--export destdir *
+       export packages and PKGBUILD for local repository</literallayout>
+<literallayout class="monospaced">--ignore package
+       skip some package</literallayout>
+<literallayout class="monospaced">-U file
+       upgrade a package from &lt;file&gt;</literallayout>
+<simpara>UPGRADE OPTIONS
+       --sysupgrade
+              upgrade all packages that are out of date</simpara>
+<literallayout class="monospaced">-d, --nodeps
+       skip dependency checks</literallayout>
+<literallayout class="monospaced">-f, --force
+       force install, overwrite conflicting files</literallayout>
+<literallayout class="monospaced">--ignore package
+       skip some package</literallayout>
+<literallayout class="monospaced">-y, --refresh
+       download fresh package databases from the server</literallayout>
+<literallayout class="monospaced">Note: aurman always shows new orphans after package update</literallayout>
+<simpara>DOWNGRADE OPTIONS
+       -Su --downgrade
+              reinstall  all  packages  which are marked as "newer than extra or core" in -Su output (this is specially for
+              users who experience problems with [testing] and want to revert back to current)</simpara>
+<simpara>QUERY OPTIONS
+       -c, --changelog
+              View the ChangeLog of a package. (not every package will provide one)</simpara>
+<literallayout class="monospaced">-d, --deps
+       list all packages installed as dependencies. This option can be combined with -t  for  listing  real  orphans
+       packages  that  were installed as dependencies but are no longer required by any installed package.  (-Qdt is
+       equivalent to the aurman 0.8.1X -Qt option)</literallayout>
+<literallayout class="monospaced">-e, --explicit
+       list all packages explicitly installed. This option can be combined with -t  to  list  -top  level  packages-
+       those packages that were explicitly installed but are not requierd by any other package.</literallayout>
+<literallayout class="monospaced">-g, --groups
+       view all members of a package group</literallayout>
+<literallayout class="monospaced">-i, --info
+       view package information (use -ii for more)</literallayout>
+<literallayout class="monospaced">-l, --list
+       list the contents of the queried package</literallayout>
+<literallayout class="monospaced">-o string *
+       search for package that owns &lt;file&gt; or &lt;command&gt;</literallayout>
+<literallayout class="monospaced">-p, --file
+       query the package file [package] instead of looking in the database</literallayout>
+<literallayout class="monospaced">-s, --search *
+       search locally-installed packages for matching strings</literallayout>
+<literallayout class="monospaced">--backupfile *
+      Query a database previously saved in a tar.bz2 file (with aurman --backup).</literallayout>
+<literallayout class="monospaced">Example: you want to reinstall archlinux with the same packages as your backup "pacman-2008-02-22_10h12.tar.bz2"</literallayout>
+<literallayout class="monospaced">just run aurman -Qet --backupfile pacman-2008-02-22_10h12.tar.bz2 &gt; TopLevelPackages.txt</literallayout>
+<literallayout class="monospaced">To reinstall later, just run aurman -S TopLevelPackages.txt</literallayout>
+<literallayout class="monospaced">--date
+      list last installed packages, ordered by install date</literallayout>
+<literallayout class="monospaced">REMOTE QUERY OPTIONS</literallayout>
+<literallayout class="monospaced">-s string *
+       search remote repositories and AUR Unsupported for matching strings</literallayout>
+<literallayout class="monospaced">--depends package *
+       list all packages which depends on specified package</literallayout>
+<literallayout class="monospaced">--conflicts package *
+       list all packages which conflicts with specified package</literallayout>
+<literallayout class="monospaced">--provides package *
+       list all packages which provides specified package</literallayout>
+<simpara>CLEANING OPTIONS
+       -c *   delete all .pacsave/.pacnew files</simpara>
+<literallayout class="monospaced">d, --database *
+       clean database (show obsolete repositories)</literallayout>
+<simpara>REMOVE OPTIONS
+       -c, --cascade
+              remove packages and all packages that depend on them</simpara>
+<literallayout class="monospaced">-d, --nodeps
+       skip dependency checks</literallayout>
+<literallayout class="monospaced">-k, --dbonly
+       only remove database entry, do not remove files</literallayout>
+<literallayout class="monospaced">-n, --nosave
+       remove configuration files as well</literallayout>
+<literallayout class="monospaced">-s, --recursive
+       remove dependencies also (that won't break packages)</literallayout>
+<literallayout class="monospaced">Note: aurman always shows new orphans after package removal</literallayout>
+<simpara>CONFIGURATION
+       Runing aurman as a non-privileged user requires some entries in sudoers file:
+         - pacman (remove package + refresh database + install AUR&#8217;s package)</simpara>
+<simpara>SEE ALSO
+       aurmanrc(5), pacman(8), makepkg(8)</simpara>
+<literallayout class="monospaced">See the berlios developer website at &lt;http://developer.berlios.de/projects/&gt; for more current information about aur‐
+man.</literallayout>
+<literallayout class="monospaced">See the Arch Linux website at &lt;http://www.archlinux.org&gt; for more current information on the  distribution  and  the
+pacman family of tools.</literallayout>
+<simpara>AUTHORS
+       Laszlo Papp &lt;<ulink url="mailto:djszapi@archlinux.us">djszapi@archlinux.us</ulink>&gt;</simpara>
+<simpara>MANPAGE AUTHORS
+       Laszlo Papp  &lt;<ulink url="mailto:djszapi@archlinux.us">djszapi@archlinux.us</ulink>&gt;</simpara>
+<literallayout class="monospaced">September 27, 2009                                           aurman(8)</literallayout>
+</refsynopsisdiv>
+</refentry>

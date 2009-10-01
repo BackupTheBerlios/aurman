@@ -1,0 +1,764 @@
+.\"     Title: aurman
+.\"    Author: [FIXME: author] [see http://docbook.sf.net/el/author]
+.\" Generator: DocBook XSL Stylesheets v1.74.0 <http://docbook.sf.net/>
+.\"      Date: 10/01/2009
+.\"    Manual: Pacman Manual
+.\"    Source: Pacman
+.\"  Language: English
+.\"
+.TH "AURMAN" "8" "10/01/2009" "Pacman" "Pacman Manual"
+.\" -----------------------------------------------------------------
+.\" * (re)Define some macros
+.\" -----------------------------------------------------------------
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" toupper - uppercase a string (locale-aware)
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de toupper
+.tr aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ
+\\$*
+.tr aabbccddeeffgghhiijjkkllmmnnooppqqrrssttuuvvwwxxyyzz
+..
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" SH-xref - format a cross-reference to an SH section
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de SH-xref
+.ie n \{\
+.\}
+.toupper \\$*
+.el \{\
+\\$*
+.\}
+..
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" SH - level-one heading that works better for non-TTY output
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de1 SH
+.\" put an extra blank line of space above the head in non-TTY output
+.if t \{\
+.sp 1
+.\}
+.sp \\n[PD]u
+.nr an-level 1
+.set-an-margin
+.nr an-prevailing-indent \\n[IN]
+.fi
+.in \\n[an-margin]u
+.ti 0
+.HTML-TAG ".NH \\n[an-level]"
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+\." make the size of the head bigger
+.ps +3
+.ft B
+.ne (2v + 1u)
+.ie n \{\
+.\" if n (TTY output), use uppercase
+.toupper \\$*
+.\}
+.el \{\
+.nr an-break-flag 0
+.\" if not n (not TTY), use normal case (not uppercase)
+\\$1
+.in \\n[an-margin]u
+.ti 0
+.\" if not n (not TTY), put a border/line under subheading
+.sp -.6
+\l'\n(.lu'
+.\}
+..
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" SS - level-two heading that works better for non-TTY output
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de1 SS
+.sp \\n[PD]u
+.nr an-level 1
+.set-an-margin
+.nr an-prevailing-indent \\n[IN]
+.fi
+.in \\n[IN]u
+.ti \\n[SN]u
+.it 1 an-trap
+.nr an-no-space-flag 1
+.nr an-break-flag 1
+.ps \\n[PS-SS]u
+\." make the size of the head bigger
+.ps +2
+.ft B
+.ne (2v + 1u)
+.if \\n[.$] \&\\$*
+..
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" BB/BE - put background/screen (filled box) around block of text
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de BB
+.if t \{\
+.sp -.5
+.br
+.in +2n
+.ll -2n
+.gcolor red
+.di BX
+.\}
+..
+.de EB
+.if t \{\
+.if "\\$2"adjust-for-leading-newline" \{\
+.sp -1
+.\}
+.br
+.di
+.in
+.ll
+.gcolor
+.nr BW \\n(.lu-\\n(.i
+.nr BH \\n(dn+.5v
+.ne \\n(BHu+.5v
+.ie "\\$2"adjust-for-leading-newline" \{\
+\M[\\$1]\h'1n'\v'+.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
+.\}
+.el \{\
+\M[\\$1]\h'1n'\v'-.5v'\D'P \\n(BWu 0 0 \\n(BHu -\\n(BWu 0 0 -\\n(BHu'\M[]
+.\}
+.in 0
+.sp -.5v
+.nf
+.BX
+.in
+.sp .5v
+.fi
+.\}
+..
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.\" BM/EM - put colored marker in margin next to block of text
+.\" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+.de BM
+.if t \{\
+.br
+.ll -2n
+.gcolor red
+.di BX
+.\}
+..
+.de EM
+.if t \{\
+.br
+.di
+.ll
+.gcolor
+.nr BH \\n(dn
+.ne \\n(BHu
+\M[\\$1]\D'P -.75n 0 0 \\n(BHu -(\\n[.i]u - \\n(INu - .75n) 0 0 -\\n(BHu'\M[]
+.in 0
+.nf
+.BX
+.in
+.fi
+.\}
+..
+.\" -----------------------------------------------------------------
+.\" * set default formatting
+.\" -----------------------------------------------------------------
+.\" disable hyphenation
+.nh
+.\" disable justification (adjust text to left margin only)
+.ad l
+.\" -----------------------------------------------------------------
+.\" * MAIN CONTENT STARTS HERE *
+.\" -----------------------------------------------------------------
+.SH "Name"
+aurman \- more than a frontend to pacman
+.SH "Synopsis"
+.sp
+aurman <operation> [options] [packages]
+.sp
+EXAMPLES aurman pm \-S packagename download package from repository, and fallback on AUR
+.sp
+.fam C
+.ps -1
+.nf
+aurman am \-\-vote package(s)
+       Vote for the desired package(s)
+.fi
+.fam
+.ps +1
+.sp
+DESCRIPTION aurman is a pacman frontend that adds a lot of features like:
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+AUR support (search, easy install, (un)vote, (un)flag, (un)notify, comment, pkgsubmit etc\&.\&.)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+interactiv search + install (with AUR Unsupported results integrated)
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+downloading PKGBUILD directly from AUR Unsupported
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+statistics on installed packages
+.RE
+.sp
+.RS 4
+.ie n \{\
+\h'-04'\(bu\h'+03'\c
+.\}
+.el \{\
+.sp -1
+.IP \(bu 2.3
+.\}
+etc\&...
+.sp
+.fam C
+.ps -1
+.nf
+aurman can be run as a non\-privileged user (safest for AUR unsupported packages)\&.
+.fi
+.fam
+.ps +1
+.RE
+.sp
+OPERATIONS aurman\(cqs options are the same as pacman\(cqs, so check the pacman man page for more info
+.sp
+.fam C
+.ps -1
+.nf
+options unique to aurman are marked by a *
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-B, \-\-backup [/where/you/want]
+       Save pacman database in specified directory\&. If no directory is specified, aurman use the current directory\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-B, \-\-backup [file\&.tar\&.bz2]
+       Restore  a  previous backup of the pacman database\&. Yaourt analyse the backup first and shows the differences
+       with the current alpm db\&. You have to type "yes" to replace the database by the old one\&. Actual  database  is
+       automatically saved in /tmp/ folder\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-C, \-\-clean
+       Perform cleaning operations on the package cache, databases and  configuration files
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-Q, \-\-query
+       Query  the package database\&. This operation allows you to view installed packages and their files, as well as
+       meta\-information about individual packages (dependencies, conflicts, install date, build  date,  size)\&.  This
+       can  be  run  against  the  local  package  database or can be used on individual \&.tar\&.gz packages\&. See QUERY
+       OPTIONS below\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-R, \-\-remove
+       Remove a package from the system\&. Files belonging to the specified package will be deleted, and the  database
+       will  be updated\&. Most configuration files will be saved with a \&.pacsave extension unless the \-\-nosave option
+       is used\&. See REMOVE OPTIONS below\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-S, \-\-sync
+       Synchronize packages\&. Packages are installed directly  from  the  ftp  servers,  including  all  dependencies
+       required  to run the packages\&. For example, aurman \-S qt will download and install qt and all the packages it
+       depends on\&. You can also use aurman \-Su to upgrade all packages that are out of date\&. See SYNC OPTIONS below\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-U, \-\-upgrade
+       Upgrade or add a package to the system\&. Either a URL or file path can be specified\&. This is  a  "remove\-then\-
+       add" process\&. See HANDLING CONFIG FILES for an explanation on how pacman takes care of config files\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-h, \-\-help
+       print this help
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-V, \-\-version
+       output program version
+.fi
+.fam
+.ps +1
+.sp
+OPTIONS \-\-noconfirm do not ask for any confirmation
+.sp
+INSTALL OPTIONS \-S, \-\-sync package * download package from repository, and fallback on aur \-b * builds the targets from source
+.sp
+.fam C
+.ps -1
+.nf
+\-c, \-\-clean
+       remove old packages from cache directory (use \-cc for all)
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-d, \-\-nodeps
+       skip dependency checks
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-asdeps
+      Install packages non\-explicitly; in other works, fake their install reason to be installed as a dependency\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-ignorearch
+      Ignore incomplete arch field in PKGBUILD\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-f, \-\-force
+       force install, overwrite conflicting files
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-g, \-\-groups
+       view all members of a package group
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-i, \-\-info *
+       view package (or PKGBUILD from AUR Unsupported) information
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-l, \-\-list *
+       list all packages belonging to the specified repository
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-p, \-\-print\-uris
+       print out download URIs for each package to be installed
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-export destdir *
+       export packages and PKGBUILD for local repository
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-ignore package
+       skip some package
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-U file
+       upgrade a package from <file>
+.fi
+.fam
+.ps +1
+.sp
+UPGRADE OPTIONS \-\-sysupgrade upgrade all packages that are out of date
+.sp
+.fam C
+.ps -1
+.nf
+\-d, \-\-nodeps
+       skip dependency checks
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-f, \-\-force
+       force install, overwrite conflicting files
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-ignore package
+       skip some package
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-y, \-\-refresh
+       download fresh package databases from the server
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+Note: aurman always shows new orphans after package update
+.fi
+.fam
+.ps +1
+.sp
+DOWNGRADE OPTIONS \-Su \-\-downgrade reinstall all packages which are marked as "newer than extra or core" in \-Su output (this is specially for users who experience problems with [testing] and want to revert back to current)
+.sp
+QUERY OPTIONS \-c, \-\-changelog View the ChangeLog of a package\&. (not every package will provide one)
+.sp
+.fam C
+.ps -1
+.nf
+\-d, \-\-deps
+       list all packages installed as dependencies\&. This option can be combined with \-t  for  listing  real  orphans
+       packages  that  were installed as dependencies but are no longer required by any installed package\&.  (\-Qdt is
+       equivalent to the aurman 0\&.8\&.1X \-Qt option)
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-e, \-\-explicit
+       list all packages explicitly installed\&. This option can be combined with \-t  to  list  \-top  level  packages\-
+       those packages that were explicitly installed but are not requierd by any other package\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-g, \-\-groups
+       view all members of a package group
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-i, \-\-info
+       view package information (use \-ii for more)
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-l, \-\-list
+       list the contents of the queried package
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-o string *
+       search for package that owns <file> or <command>
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-p, \-\-file
+       query the package file [package] instead of looking in the database
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-s, \-\-search *
+       search locally\-installed packages for matching strings
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-backupfile *
+      Query a database previously saved in a tar\&.bz2 file (with aurman \-\-backup)\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+Example: you want to reinstall archlinux with the same packages as your backup "pacman\-2008\-02\-22_10h12\&.tar\&.bz2"
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+just run aurman \-Qet \-\-backupfile pacman\-2008\-02\-22_10h12\&.tar\&.bz2 > TopLevelPackages\&.txt
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+To reinstall later, just run aurman \-S TopLevelPackages\&.txt
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-date
+      list last installed packages, ordered by install date
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+REMOTE QUERY OPTIONS
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-s string *
+       search remote repositories and AUR Unsupported for matching strings
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-depends package *
+       list all packages which depends on specified package
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-conflicts package *
+       list all packages which conflicts with specified package
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-\-provides package *
+       list all packages which provides specified package
+.fi
+.fam
+.ps +1
+.sp
+CLEANING OPTIONS \-c * delete all \&.pacsave/\&.pacnew files
+.sp
+.fam C
+.ps -1
+.nf
+d, \-\-database *
+       clean database (show obsolete repositories)
+.fi
+.fam
+.ps +1
+.sp
+REMOVE OPTIONS \-c, \-\-cascade remove packages and all packages that depend on them
+.sp
+.fam C
+.ps -1
+.nf
+\-d, \-\-nodeps
+       skip dependency checks
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-k, \-\-dbonly
+       only remove database entry, do not remove files
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-n, \-\-nosave
+       remove configuration files as well
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+\-s, \-\-recursive
+       remove dependencies also (that won\'t break packages)
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+Note: aurman always shows new orphans after package removal
+.fi
+.fam
+.ps +1
+.sp
+CONFIGURATION Runing aurman as a non\-privileged user requires some entries in sudoers file: \- pacman (remove package + refresh database + install AUR\(cqs package)
+.sp
+SEE ALSO aurmanrc(5), pacman(8), makepkg(8)
+.sp
+.fam C
+.ps -1
+.nf
+See the berlios developer website at <http://developer\&.berlios\&.de/projects/> for more current information about aur\(hy
+man\&.
+.fi
+.fam
+.ps +1
+.sp
+.fam C
+.ps -1
+.nf
+See the Arch Linux website at <http://www\&.archlinux\&.org> for more current information on the  distribution  and  the
+pacman family of tools\&.
+.fi
+.fam
+.ps +1
+.sp
+AUTHORS Laszlo Papp <djszapi@archlinux\&.us>
+.sp
+MANPAGE AUTHORS Laszlo Papp <djszapi@archlinux\&.us>
+.sp
+.fam C
+.ps -1
+.nf
+September 27, 2009                                           aurman(8)
+.fi
+.fam
+.ps +1

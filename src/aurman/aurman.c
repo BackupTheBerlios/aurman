@@ -73,9 +73,6 @@ char pkg_sample[200];
 int error_flag = 0;
 char package[200];
 CURL *handle = NULL;
-int pkgsubmit_signal;
-int download_signal;
-int comment_signal;
 int pkg_action_id;
 char *pkg_name;
 int catix;
@@ -91,19 +88,6 @@ typedef enum _pkg_detail_action_type_t {
     AM_PKG_ACTION_TYPE_DISOWN,
     AM_PKG_ACTION_TYPE_DELETE,
 } pkg_detail_action_type_t;
-
-/*
- * Logging facilities
- */
-
-/* Levels */
-typedef enum _amloglevel_t {
-	AM_LOG_ERROR    = 0x01,
-	AM_LOG_WARNING  = 0x02,
-	AM_LOG_DEBUG    = 0x04,
-	AM_LOG_FUNCTION = 0x08
-} amloglevel_t;
-
 
 /*
  * Errors
@@ -1061,16 +1045,16 @@ static int parseargs(int argc, char *argv[])
                 strncpy(pass, optarg, sizeof(optarg));
                 break;
             case AM_LONG_OP_PKGSUBMIT:
-                pkgsubmit_signal = 1;
+                config->am_pkgsubmit = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
             case AM_LONG_OP_CATEGORY:
                 break;
             case AM_LONG_OP_DOWNLOAD:
-                download_signal = 1;
+                config->am_downloadonly = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
             case AM_LONG_OP_COMMENT:
-                comment_signal = 1;
+                config->am_comment = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
             case 'h':
@@ -1145,6 +1129,19 @@ int am_aur (int argc, char *argv[])
         fclose(aurman_conf_file);
     }
 
+	/* init config data */
+	config = config_new();
+
+	/* Priority of options:
+	 * 1. command line
+	 * 2. config file
+	 * 3. compiled-in defaults
+	 * However, we have to parse the command line first because a config file
+	 * location can be specified here, so we need to make sure we prefer these
+	 * options over the config file coming second.
+	 */
+
+	/* parse the command line */
 	ret = parseargs(argc, argv);
 	if(!ret) {
 		return -1;
@@ -1166,13 +1163,12 @@ int am_aur (int argc, char *argv[])
         am_pkg_action(handle, pkg_action_id);
     }
 
-    if (pkgsubmit_signal) {
+    if (config->am_pkgsubmit) {
         am_login(handle);
         am_pkgsubmit (handle, aur_submit_url, pkg_name, "3", &res);
-        pkgsubmit_signal = 0;
     }
 
-    if (download_signal) {
+    if (config->am_downloadonly) {
         if(handle) {
             /*
              * Get curl 7.9.2 from AUR http site. curl 7.9.2 is most likely not
@@ -1198,13 +1194,11 @@ int am_aur (int argc, char *argv[])
         if(httpfile.stream)
             fclose(httpfile.stream); /* close the local file */
         am_unpack(pkg_archive, ".", NULL);
-        download_signal = 0;
     }
 
-    if (comment_signal) {
+    if (config->am_comment) {
         am_login(handle);
         am_comment(handle);
-        pkgsubmit_signal = 0;
     }
 
     curl_easy_cleanup(handle);

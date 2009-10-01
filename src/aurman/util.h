@@ -74,9 +74,9 @@ int am_fprintf(FILE *stream, amloglevel_t level, const char *format, ...) __attr
 int am_vfprintf(FILE *stream, amloglevel_t level, const char *format, va_list args) __attribute__((format(printf,3,0)));
 int am_vasprintf(char **string, amloglevel_t level, const char *format, va_list args) __attribute__((format(printf,3,0)));
 
-#ifndef HAVE_STRNDUP
-char *strndup(const char *s, size_t n);
-#endif
+// #ifndef HAVE_STRNDUP
+// char *strndup(const char *s, size_t n);
+// #endif
 
 #endif /* _AM_UTIL_H */
 

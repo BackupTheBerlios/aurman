@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN" "http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd">
+<refentry>
+<refentryinfo>
+</refentryinfo>
+<refmeta>
+<refentrytitle>aurmanrc</refentrytitle>
+<manvolnum>5</manvolnum>
+<refmiscinfo class="source">Pacman</refmiscinfo>
+<refmiscinfo class="manual">Pacman Manual</refmiscinfo>
+</refmeta>
+<refnamediv>
+  <refname>aurmanrc</refname>
+  <refpurpose>aurman package manager configuration file</refpurpose>
+</refnamediv>
+<refsynopsisdiv id="_synopsis">
+<simpara>/home/user/.aurmanrc</simpara>
+</refsynopsisdiv>
+<refsect1 id="_description">
+<title>Description</title>
+<literallayout class="monospaced">aurman(8) obtains configuration data from the following sources in the following order:</literallayout>
+<orderedlist numeration="arabic">
+<listitem>
+<simpara>
+command-line options
+</simpara>
+</listitem>
+<listitem>
+<simpara>
+user&#8217;s configuration file (~/.aurmanrc)
+</simpara>
+<literallayout class="monospaced">user
+  Username of the desired user with whose account you would like to take the operations.</literallayout>
+<literallayout class="monospaced">pass
+  Password of the desired user with whose account you would like to the operations.</literallayout>
+<literallayout class="monospaced">download
+  Download location to where to download the AUR package(s).</literallayout>
+</listitem>
+</orderedlist>
+<simpara>SEE ALSO
+       aurman(8) pacman(8),</simpara>
+<literallayout class="monospaced">See  the  berlios  developer  website  at &lt;http://developer.berlios.de/projects/aurman&gt; for more current information
+about aurman.</literallayout>
+<literallayout class="monospaced">See the Arch Linux website at &lt;http://www.archlinux.org&gt; for more current information on the  distribution  and  the
+pacman family of tools.</literallayout>
+<simpara>AUTHORS
+       Laszlo Papp &lt;<ulink url="mailto:djszapi@archlinux.us">djszapi@archlinux.us</ulink>&gt;
+       Lajos Kovacs &lt;<ulink url="mailto:klajos@archlinux.us">klajos@archlinux.us</ulink>&gt;</simpara>
+<simpara>MANPAGE AUTHORS
+       Laszlo Papp  &lt;<ulink url="mailto:djszapi@archlinux.us">djszapi@archlinux.us</ulink>&gt;</simpara>
+<literallayout class="monospaced">September 27, 2009                                         aurmanrc(5)</literallayout>
+</refsect1>
+</refentry>
