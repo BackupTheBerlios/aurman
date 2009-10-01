@@ -80,6 +80,96 @@ int pkg_action_id;
 char *pkg_name;
 int catix;
 
+typedef enum _pkg_detail_action_type_t {
+    AM_PKG_ACTION_TYPE_VOTE=1,
+    AM_PKG_ACTION_TYPE_UNVOTE,
+    AM_PKG_ACTION_TYPE_FLAG,
+    AM_PKG_ACTION_TYPE_UNFLAG,
+    AM_PKG_ACTION_TYPE_NOTIFY,
+    AM_PKG_ACTION_TYPE_UNNOTIFY,
+    AM_PKG_ACTION_TYPE_ADOPT,
+    AM_PKG_ACTION_TYPE_DISOWN,
+    AM_PKG_ACTION_TYPE_DELETE,
+} pkg_detail_action_type_t;
+
+/*
+ * Logging facilities
+ */
+
+/* Levels */
+typedef enum _amloglevel_t {
+	AM_LOG_ERROR    = 0x01,
+	AM_LOG_WARNING  = 0x02,
+	AM_LOG_DEBUG    = 0x04,
+	AM_LOG_FUNCTION = 0x08
+} amloglevel_t;
+
+
+/*
+ * Errors
+ */
+enum _amerrno_t {
+	AM_ERR_MEMORY = 1,
+	AM_ERR_SYSTEM,
+	AM_ERR_BADPERMS,
+	AM_ERR_NOT_A_FILE,
+	AM_ERR_NOT_A_DIR,
+	AM_ERR_WRONG_ARGS,
+	/* Interface */
+	AM_ERR_HANDLE_NULL,
+	AM_ERR_HANDLE_NOT_NULL,
+	AM_ERR_HANDLE_LOCK,
+	/* Databases */
+	AM_ERR_DB_OPEN,
+	AM_ERR_DB_CREATE,
+	AM_ERR_DB_NULL,
+	AM_ERR_DB_NOT_NULL,
+	AM_ERR_DB_NOT_FOUND,
+	AM_ERR_DB_WRITE,
+	AM_ERR_DB_REMOVE,
+	/* Servers */
+	AM_ERR_SERVER_BAD_URL,
+	AM_ERR_SERVER_NONE,
+	/* Transactions */
+	AM_ERR_TRANS_NOT_NULL,
+	AM_ERR_TRANS_NULL,
+	AM_ERR_TRANS_DUP_TARGET,
+	AM_ERR_TRANS_NOT_INITIALIZED,
+	AM_ERR_TRANS_NOT_PREPARED,
+	AM_ERR_TRANS_ABORT,
+	AM_ERR_TRANS_TYPE,
+	AM_ERR_TRANS_NOT_LOCKED,
+	/* Packages */
+	AM_ERR_PKG_NOT_FOUND,
+	AM_ERR_PKG_IGNORED,
+	AM_ERR_PKG_INVALID,
+	AM_ERR_PKG_OPEN,
+	AM_ERR_PKG_CANT_REMOVE,
+	AM_ERR_PKG_INVALID_NAME,
+	AM_ERR_PKG_REPO_NOT_FOUND,
+	/* Deltas */
+	AM_ERR_DLT_INVALID,
+	AM_ERR_DLT_PATCHFAILED,
+	/* Dependencies */
+	AM_ERR_UNSATISFIED_DEPS,
+	AM_ERR_CONFLICTING_DEPS,
+	AM_ERR_FILE_CONFLICTS,
+	/* Misc */
+	AM_ERR_RETRIEVE,
+	AM_ERR_INVALID_REGEX,
+	/* External library errors */
+	AM_ERR_LIBARCHIVE,
+	AM_ERR_LIBFETCH,
+	AM_ERR_LIBCURL,
+	AM_ERR_EXTERNAL_DOWNLOAD
+};
+
+//------------------------------------------------------------------------------
+struct HttpFile {
+  const char *filename;
+  FILE *stream;
+};
+
 typedef void (*line_handler_t) (char *line);
 
 typedef struct pkg_info {
@@ -106,6 +196,7 @@ typedef enum pkg_info_type {
 typedef void (*pkg_info_handler_t)(pkg_info_t *info);
 
 //------------------------------------------------------------------
+// Strip '\' character from a string
 static char *_am_str_strip_back_slash(char *str)
 {
 	register char *s = str, *t = str;
@@ -117,6 +208,7 @@ static char *_am_str_strip_back_slash(char *str)
 }
 
 //------------------------------------------------------------------
+// Initialization the json/rpc interface related struct
 static pkg_info_t *_am_pkg_info_init(pkg_info_t *info)
 {
 	info->name = "";
@@ -133,7 +225,18 @@ static pkg_info_t *_am_pkg_info_init(pkg_info_t *info)
 	return info;
 }
 
-//------------------------------------------------------------------
+//--------------------------------------------------------------------------
+/*
+  @brief Get the next key/value element of the output of rpc/json interface
+ *
+ * @param src: start of the result array
+ * @param out_tail: pointer to the location after the got key/value string
+ * @param out_str: the got key/value string in the result array
+ *
+ * @return out_tail
+ *
+ * @note src is expected to be a valid pointer, no validation done
+ */
 static char *_am_pip_next_str(char *src, char **out_tail, char **out_str)
 {
 	register char *s = src;
@@ -154,11 +257,22 @@ static char *_am_pip_next_str(char *src, char **out_tail, char **out_str)
 }
 
 //------------------------------------------------------------------
+/*
+ * @brief Get the the value of type argument
+ *
+ * @param src: start of the output of json/rpc interface
+ * @param out_tail: pointer to the location after the result value string
+ *
+ * @return type: pkg_info_type_t value of the type value
+ * PKG_INFO_TYPE_NONE in case of error
+ *
+ * @note src is expected to be a valid pointer, no validation done
+ */
 static pkg_info_type_t _am_pip_get_type(char *src, char **out_tail)
 {
 	pkg_info_type_t type = PKG_INFO_TYPE_NONE;
 	src = strstr(src, "type\"");
-	if (src && *(src += 5) && _am_pip_next_str(src, out_tail, &src)) {
+	if (src && *(src += sizeof("type\"")) && _am_pip_next_str(src, out_tail, &src)) {
 		if (strcmp(src, "search") == 0) {
 			type = PKG_INFO_TYPE_SEARCH;
 		} else if (strcmp(src, "info") == 0) {
@@ -175,6 +289,19 @@ static pkg_info_type_t _am_pip_get_type(char *src, char **out_tail)
 }
 
 //------------------------------------------------------------------
+/* @brief To fill out the pkg_info_t struct with the got data from json/rpc
+ * interface
+ *
+ * @param src: start of the output of json/rpc interface
+ * @param out_tail: pointer to the location after the json/rpc interface per
+ * package
+ * @info: the filled struct with the result values
+ *
+ * @return type: the location after the the json/rpc interface per package
+ *
+ *
+ * @note src is expected to be a valid pointer, no validation done
+ */
 static char *_am_pip_info(char *src, char **out_tail, pkg_info_t *info)
 {
 	char *key, *val;
@@ -215,6 +342,20 @@ static char *_am_pip_info(char *src, char **out_tail, pkg_info_t *info)
 	return src;
 }
 
+/* @brief To fill out the pkg_info_t struct with the got data from json/rpc
+ * interface
+ *
+ * @param src: start of the output of json/rpc interface
+ * @param out_tail: pointer to the location after the json/rpc interface per
+ * package
+ * @handler: the handler function for pkg_info
+ *
+ * @return type: void
+ *
+ *
+ * @note src is expected to be a valid pointer, no validation done
+ * @note handler is expected to be a valid argument, no validation done
+ */
 //------------------------------------------------------------------
 static void _am_pip_foreach(char *src, char **out_tail, pkg_info_handler_t handler)
 {
@@ -226,6 +367,19 @@ static void _am_pip_foreach(char *src, char **out_tail, pkg_info_handler_t handl
 }
 
 //------------------------------------------------------------------
+/* @brief Concatenate the elements of a string array into one string, space
+ * character between the elements
+ *
+ * @param count: the number of strings in string vector that we would like to
+ * concatenate
+ * @param strv: the string vector which contains the strings which will be
+ * concatenated
+ *
+ * @return str: the concatenated string
+ *
+ *
+ * @note strv is expected to be a valid pointer, no validation done
+ */
 static char *_am_strvcat(int count, char **strv)
 {
 	char *s, *str;
@@ -276,7 +430,7 @@ static int _am_exec(int argc, char **argv, line_handler_t line_handler)
 	return ret;
 }
 
-
+//------------------------------------------------------------------
 /** Parse the basename of a program from a path.
 * Grabbed from the uClibc source.
 * @param path path to parse basename from
@@ -299,8 +453,8 @@ char *mbasename(const char *path)
 	return (char *)p;
 }
 
+//------------------------------------------------------------------
 /* Compression functions */
-
 /**
  * @brief Unpack a specific file or all files in an archive.
  *
@@ -309,7 +463,7 @@ char *mbasename(const char *path)
  * @param fn       a file within the archive to unpack or NULL for all
  * @return 0 on success, 1 on failure
  */
-int _alpm_unpack(const char *archive, const char *prefix, const char *fn)
+int am_unpack(const char *archive, const char *prefix, const char *fn)
 {
 	int ret = 0;
 	mode_t oldmask;
@@ -401,6 +555,7 @@ cleanup:
 	return(ret);
 }
 
+//------------------------------------------------------------------------------
 CURL *_am_handle_new()
 {
 	CURL *handle;
@@ -413,6 +568,7 @@ CURL *_am_handle_new()
 	return(handle);
 }
 
+//------------------------------------------------------------------------------
 void _am_handle_free(CURL *handle)
 {
 	/* ALPM_LOG_FUNC; */
@@ -423,96 +579,6 @@ void _am_handle_free(CURL *handle)
 
 	free(handle);
 }
-
-typedef enum _pkg_detail_action_type_t {
-    AM_PKG_ACTION_TYPE_VOTE=1,
-    AM_PKG_ACTION_TYPE_UNVOTE,
-    AM_PKG_ACTION_TYPE_FLAG,
-    AM_PKG_ACTION_TYPE_UNFLAG,
-    AM_PKG_ACTION_TYPE_NOTIFY,
-    AM_PKG_ACTION_TYPE_UNNOTIFY,
-    AM_PKG_ACTION_TYPE_ADOPT,
-    AM_PKG_ACTION_TYPE_DISOWN,
-    AM_PKG_ACTION_TYPE_DELETE,
-} pkg_detail_action_type_t;
-
-/*
- * Logging facilities
- */
-
-/* Levels */
-typedef enum _aurloglevel_t {
-	AUR_LOG_ERROR    = 0x01,
-	AUR_LOG_WARNING  = 0x02,
-	AUR_LOG_DEBUG    = 0x04,
-	AUR_LOG_FUNCTION = 0x08
-} aurloglevel_t;
-
-
-/*
- * Errors
- */
-enum _aurerrno_t {
-	AUR_ERR_MEMORY = 1,
-	AUR_ERR_SYSTEM,
-	AUR_ERR_BADPERMS,
-	AUR_ERR_NOT_A_FILE,
-	AUR_ERR_NOT_A_DIR,
-	AUR_ERR_WRONG_ARGS,
-	/* Interface */
-	AUR_ERR_HANDLE_NULL,
-	AUR_ERR_HANDLE_NOT_NULL,
-	AUR_ERR_HANDLE_LOCK,
-	/* Databases */
-	AUR_ERR_DB_OPEN,
-	AUR_ERR_DB_CREATE,
-	AUR_ERR_DB_NULL,
-	AUR_ERR_DB_NOT_NULL,
-	AUR_ERR_DB_NOT_FOUND,
-	AUR_ERR_DB_WRITE,
-	AUR_ERR_DB_REMOVE,
-	/* Servers */
-	AUR_ERR_SERVER_BAD_URL,
-	AUR_ERR_SERVER_NONE,
-	/* Transactions */
-	AUR_ERR_TRANS_NOT_NULL,
-	AUR_ERR_TRANS_NULL,
-	AUR_ERR_TRANS_DUP_TARGET,
-	AUR_ERR_TRANS_NOT_INITIALIZED,
-	AUR_ERR_TRANS_NOT_PREPARED,
-	AUR_ERR_TRANS_ABORT,
-	AUR_ERR_TRANS_TYPE,
-	AUR_ERR_TRANS_NOT_LOCKED,
-	/* Packages */
-	AUR_ERR_PKG_NOT_FOUND,
-	AUR_ERR_PKG_IGNORED,
-	AUR_ERR_PKG_INVALID,
-	AUR_ERR_PKG_OPEN,
-	AUR_ERR_PKG_CANT_REMOVE,
-	AUR_ERR_PKG_INVALID_NAME,
-	AUR_ERR_PKG_REPO_NOT_FOUND,
-	/* Deltas */
-	AUR_ERR_DLT_INVALID,
-	AUR_ERR_DLT_PATCHFAILED,
-	/* Dependencies */
-	AUR_ERR_UNSATISFIED_DEPS,
-	AUR_ERR_CONFLICTING_DEPS,
-	AUR_ERR_FILE_CONFLICTS,
-	/* Misc */
-	AUR_ERR_RETRIEVE,
-	AUR_ERR_INVALID_REGEX,
-	/* External library errors */
-	AUR_ERR_LIBARCHIVE,
-	AUR_ERR_LIBFETCH,
-	AUR_ERR_LIBCURL,
-	AUR_ERR_EXTERNAL_DOWNLOAD
-};
-
-//------------------------------------------------------------------------------
-struct HttpFile {
-  const char *filename;
-  FILE *stream;
-};
 
 //------------------------------------------------------------------------------
 static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
@@ -598,7 +664,7 @@ int am_login(CURL *handle)
     return 0;
 }
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /*
   @brief submits a package to aur
  *
@@ -655,7 +721,7 @@ size_t get_pkg_id(void *ptr, size_t size, size_t nmemb, void *stream)
     return size*nmemb;
 }
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /*
   @brief submits a package to aur
  *
@@ -663,7 +729,7 @@ size_t get_pkg_id(void *ptr, size_t size, size_t nmemb, void *stream)
  * @param url AUR url
  * @param filename Path of file to upload
  * @param category Numeric package category
- * @param result Out-pointer to store cURL result, pass NULL to ignore the result
+ * @param result out-pointer to store cURL result, pass NULL to ignore the result
 
  * @return 0 on success, non-zero on error
  *
@@ -751,7 +817,6 @@ int am_comment(CURL *handle)
     return 0;
 }
 
-
 //-------------------------------------------------------------------------
 #ifndef __GNUC__
 /* #ifndef HAVE_STRNDUP */
@@ -778,8 +843,6 @@ char *strndup(const char *s, size_t n)
 #endif
 
 //-------------------------------------------------------------------------
-/* vim: set ts=2 sw=2 noet: */
-
 /** Display usage/syntax for the specified operation.
  * @param op     the operation code requested
  * @param myname basename(argv[0])
@@ -824,7 +887,6 @@ static void usage(const char * const myname)
 //------------------------------------------------------------------
 /** Output aurman version and copyright.
  */
-
 static void version(void)
 {
 	printf("\n");
@@ -1135,7 +1197,7 @@ int am_aur (int argc, char *argv[])
         }
         if(httpfile.stream)
             fclose(httpfile.stream); /* close the local file */
-        _alpm_unpack(pkg_archive, ".", NULL);
+        am_unpack(pkg_archive, ".", NULL);
         download_signal = 0;
     }
 
