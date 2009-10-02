@@ -18,7 +18,10 @@ conf.o: conf.c ../../config.h /usr/include/stdlib.h \
  /usr/include/bits/stdio.h /usr/include/string.h \
  /usr/include/bits/string.h /usr/include/bits/string2.h conf.h \
  /usr/local/include/alpm.h /usr/local/include/alpm_list.h util.h \
- /usr/include/libintl.h /usr/include/locale.h /usr/include/bits/locale.h
+ /usr/include/dirent.h /usr/include/bits/dirent.h \
+ /usr/include/bits/posix1_lim.h /usr/include/bits/local_lim.h \
+ /usr/include/linux/limits.h /usr/include/libintl.h /usr/include/locale.h \
+ /usr/include/bits/locale.h
 
 ../../config.h:
 
@@ -99,6 +102,16 @@ conf.h:
 /usr/local/include/alpm_list.h:
 
 util.h:
+
+/usr/include/dirent.h:
+
+/usr/include/bits/dirent.h:
+
+/usr/include/bits/posix1_lim.h:
+
+/usr/include/bits/local_lim.h:
+
+/usr/include/linux/limits.h:
 
 /usr/include/libintl.h:
 

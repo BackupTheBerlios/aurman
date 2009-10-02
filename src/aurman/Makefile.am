@@ -24,6 +24,7 @@ endif
 
 aurman_SOURCES = \
 	conf.h conf.c \
+	db.h db.c \
 	aurman.h aurman.c \
 	util.h util.c
 

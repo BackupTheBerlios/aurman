@@ -28,4 +28,4 @@ cscope.out
 cscope.in.out
 cscope.po.out
 pacman-*.tar.gz
-
+./src/aurman/aurman

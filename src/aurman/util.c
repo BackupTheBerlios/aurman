@@ -155,3 +155,32 @@ int am_vfprintf(FILE *stream, amloglevel_t level, const char *format, va_list ar
 	return(ret);
 }
 
+/**
+ * @brief count the number of entries in a directory
+ *
+ * @param dp pointer to an open DIR
+ * @param one of am_dirlen_mode
+ * @return the number of valid entries counted (effected by \cmode)
+ *
+ * @note \cdp is assumed to be at the start of the DIRectory and is rewound accordingly
+ */
+unsigned int am_dirlen(DIR *dp, am_dirlen_mode_t mode)
+{
+	unsigned int dlen = 0;
+	struct dirent *de;
+	while ((de = readdir(dp)) != NULL) {
+		switch (mode) {
+			case AM_DIRLEN_SKIP_DOTFILES:
+				if (de->d_name[0] != '.') {
+					++dlen;
+				}
+				break;
+			case AM_DIRLEN_MODE_NORMAL:
+				++dlen;
+				break;
+		}
+	}
+	rewinddir(dp);
+	return dlen;
+}
+

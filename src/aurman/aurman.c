@@ -28,6 +28,7 @@
 #include <stdlib.h> /* atoi */
 #include <stdio.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <limits.h>
 #include <getopt.h>
 #include <string.h>
@@ -50,11 +51,16 @@
 #include "aurman.h"
 #include "util.h"
 #include "conf.h"
+#include "db.h"
 
 /* libcurl, libarchive */
 #include <curl/curl.h>
 #include <archive.h>
 #include <archive_entry.h>
+
+amdb_t *db_local;
+/* list of targets specified on command line */
+static alpm_list_t *am_targets;
 
 /* char TMPDIR="/tmp/aurvote-tmp-$(id -un)$$" */
 const char aur_main_url[] = "http://aur.archlinux.org";
@@ -147,6 +153,27 @@ enum _amerrno_t {
 	AM_ERR_LIBCURL,
 	AM_ERR_EXTERNAL_DOWNLOAD
 };
+
+//------------------------------------------------------
+/** Free the resources.
+ *
+ * @param ret the return value
+ */
+static void cleanup(int ret) {
+	/* free alpm library resources */
+	if(alpm_release() == -1) {
+		am_printf(PM_LOG_ERROR, alpm_strerrorlast());
+	}
+
+	/* free memory */
+	FREELIST(am_targets);
+	if(config) {
+		config_free(config);
+		config = NULL;
+	}
+
+	exit(ret);
+}
 
 //------------------------------------------------------------------------------
 struct HttpFile {
@@ -964,6 +991,11 @@ int am_pkg_action(CURL *handle, int am_pkg_action_t) {
 
 char *global_arg_value;
 //------------------------------------------------------------------
+/** Parse command-line arguments for each operation.
+ * @param argc argc
+ * @param argv argv
+ * @return 0 on success, 1 on error
+ */
 static int parseargs(int argc, char *argv[])
 {
 	int opt;
@@ -1071,17 +1103,13 @@ static int parseargs(int argc, char *argv[])
         }
     }
 
-    while(optind < argc) {
-        /* add the target to our target array */
-        // The next version will handle more arguments too
-        memset(package,0,sizeof(package));
-        strncpy(package,argv[optind],strlen(package));
-        /* pm_targets = alpm_list_add(pm_targets, strdup(argv[optind])); */
-        optind++;
-    }
+	while(optind < argc) {
+		/* add the target to our target array */
+		am_targets = alpm_list_add(am_targets, strdup(argv[optind]));
+		optind++;
+	}
 
-	/* return(0); */
-    return(1);
+    return(0);
 }
 
 //------------------------------------------------------------------
