@@ -2,23 +2,8 @@
 #define _AM_DESC
 
 #include <time.h>
-#include <alpm_list.h>
+#include <alam_list.h>
 
-
-/* Database */
-struct __amdb_t {
-	char *treename;
-	/* do not access directly, use _alpm_db_path(db) for lazy access */
-	char *_path;
-	unsigned short pkgcache_loaded;
-	unsigned short grpcache_loaded;
-	unsigned short is_local;
-	alpm_list_t *pkgcache;
-	alpm_list_t *grpcache;
-	alpm_list_t *servers;
-};
-
-typedef struct __amdb_t amdb_t;
 
 /**
  * @note all values are hash values generated from \cam_db_tag_hash()

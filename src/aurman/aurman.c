@@ -43,9 +43,9 @@
 #include <mcheck.h> /* debug tracing (mtrace) */
 #endif
 
-/* alpm */
-#include <alpm.h>
-#include <alpm_list.h>
+/* alam */
+#include <alam.h>
+#include <alam_list.h>
 
 /* aurman */
 #include "aurman.h"
@@ -60,7 +60,7 @@
 
 amdb_t *db_local;
 /* list of targets specified on command line */
-static alpm_list_t *am_targets;
+static alam_list_t *am_targets;
 
 /* char TMPDIR="/tmp/aurvote-tmp-$(id -un)$$" */
 const char aur_main_url[] = "http://aur.archlinux.org";
@@ -82,77 +82,24 @@ CURL *handle = NULL;
 int pkg_action_id;
 char *pkg_name;
 int catix;
+char *global_arg_value;
 
-typedef enum _pkg_detail_action_type_t {
-    AM_PKG_ACTION_TYPE_VOTE=1,
-    AM_PKG_ACTION_TYPE_UNVOTE,
-    AM_PKG_ACTION_TYPE_FLAG,
-    AM_PKG_ACTION_TYPE_UNFLAG,
-    AM_PKG_ACTION_TYPE_NOTIFY,
-    AM_PKG_ACTION_TYPE_UNNOTIFY,
-    AM_PKG_ACTION_TYPE_ADOPT,
-    AM_PKG_ACTION_TYPE_DISOWN,
-    AM_PKG_ACTION_TYPE_DELETE,
-} pkg_detail_action_type_t;
 
-/*
- * Errors
- */
-enum _amerrno_t {
-	AM_ERR_MEMORY = 1,
-	AM_ERR_SYSTEM,
-	AM_ERR_BADPERMS,
-	AM_ERR_NOT_A_FILE,
-	AM_ERR_NOT_A_DIR,
-	AM_ERR_WRONG_ARGS,
-	/* Interface */
-	AM_ERR_HANDLE_NULL,
-	AM_ERR_HANDLE_NOT_NULL,
-	AM_ERR_HANDLE_LOCK,
-	/* Databases */
-	AM_ERR_DB_OPEN,
-	AM_ERR_DB_CREATE,
-	AM_ERR_DB_NULL,
-	AM_ERR_DB_NOT_NULL,
-	AM_ERR_DB_NOT_FOUND,
-	AM_ERR_DB_WRITE,
-	AM_ERR_DB_REMOVE,
-	/* Servers */
-	AM_ERR_SERVER_BAD_URL,
-	AM_ERR_SERVER_NONE,
-	/* Transactions */
-	AM_ERR_TRANS_NOT_NULL,
-	AM_ERR_TRANS_NULL,
-	AM_ERR_TRANS_DUP_TARGET,
-	AM_ERR_TRANS_NOT_INITIALIZED,
-	AM_ERR_TRANS_NOT_PREPARED,
-	AM_ERR_TRANS_ABORT,
-	AM_ERR_TRANS_TYPE,
-	AM_ERR_TRANS_NOT_LOCKED,
-	/* Packages */
-	AM_ERR_PKG_NOT_FOUND,
-	AM_ERR_PKG_IGNORED,
-	AM_ERR_PKG_INVALID,
-	AM_ERR_PKG_OPEN,
-	AM_ERR_PKG_CANT_REMOVE,
-	AM_ERR_PKG_INVALID_NAME,
-	AM_ERR_PKG_REPO_NOT_FOUND,
-	/* Deltas */
-	AM_ERR_DLT_INVALID,
-	AM_ERR_DLT_PATCHFAILED,
-	/* Dependencies */
-	AM_ERR_UNSATISFIED_DEPS,
-	AM_ERR_CONFLICTING_DEPS,
-	AM_ERR_FILE_CONFLICTS,
-	/* Misc */
-	AM_ERR_RETRIEVE,
-	AM_ERR_INVALID_REGEX,
-	/* External library errors */
-	AM_ERR_LIBARCHIVE,
-	AM_ERR_LIBFETCH,
-	AM_ERR_LIBCURL,
-	AM_ERR_EXTERNAL_DOWNLOAD
-};
+typedef void (*line_handler_t) (char *line);
+
+
+static void setarch(const char *arch)
+{
+	if (strcmp(arch, "auto") == 0) {
+		struct utsname un;
+		uname(&un);
+		am_printf(AM_LOG_DEBUG, "config: architecture: %s\n", un.machine);
+		alam_option_set_arch(un.machine);
+	} else {
+		am_printf(AM_LOG_DEBUG, "config: architecture: %s\n", arch);
+		alam_option_set_arch(arch);
+	}
+}
 
 //------------------------------------------------------
 /** Free the resources.
@@ -160,9 +107,9 @@ enum _amerrno_t {
  * @param ret the return value
  */
 static void cleanup(int ret) {
-	/* free alpm library resources */
-	if(alpm_release() == -1) {
-		am_printf(PM_LOG_ERROR, alpm_strerrorlast());
+	/* free alam library resources */
+	if(alam_release() == -1) {
+		am_printf(AM_LOG_ERROR, alam_strerrorlast());
 	}
 
 	/* free memory */
@@ -181,8 +128,7 @@ struct HttpFile {
   FILE *stream;
 };
 
-typedef void (*line_handler_t) (char *line);
-
+//------------------------------------------------------------------------------
 typedef struct pkg_info {
 	const char *name;
 	const char *version;
@@ -197,14 +143,15 @@ typedef struct pkg_info {
 	unsigned int out_of_date;
 } pkg_info_t;
 
+typedef void (*pkg_info_handler_t)(pkg_info_t *info);
+
+//------------------------------------------------------------------------------
 typedef enum pkg_info_type {
 	PKG_INFO_TYPE_SEARCH,
 	PKG_INFO_TYPE_INFO,
 	PKG_INFO_TYPE_ERROR,
 	PKG_INFO_TYPE_NONE
 } pkg_info_type_t;
-
-typedef void (*pkg_info_handler_t)(pkg_info_t *info);
 
 //------------------------------------------------------------------
 // Strip '\' character from a string
@@ -238,7 +185,7 @@ static pkg_info_t *_am_pkg_info_init(pkg_info_t *info)
 
 //--------------------------------------------------------------------------
 /*
-  @brief Get the next key/value element of the output of rpc/json interface
+ * @brief Get the next key/value element of the output of rpc/json interface
  *
  * @param src: start of the result array
  * @param out_tail: pointer to the location after the got key/value string
@@ -353,6 +300,7 @@ static char *_am_pip_info(char *src, char **out_tail, pkg_info_t *info)
 	return src;
 }
 
+//------------------------------------------------------------------
 /* @brief To fill out the pkg_info_t struct with the got data from json/rpc
  * interface
  *
@@ -367,7 +315,6 @@ static char *_am_pip_info(char *src, char **out_tail, pkg_info_t *info)
  * @note src is expected to be a valid pointer, no validation done
  * @note handler is expected to be a valid argument, no validation done
  */
-//------------------------------------------------------------------
 static void _am_pip_foreach(char *src, char **out_tail, pkg_info_handler_t handler)
 {
 	pkg_info_t info;
@@ -441,131 +388,6 @@ static int _am_exec(int argc, char **argv, line_handler_t line_handler)
 	return ret;
 }
 
-//------------------------------------------------------------------
-/** Parse the basename of a program from a path.
-* Grabbed from the uClibc source.
-* @param path path to parse basename from
-*
-* @return everything following the final '/'
-*/
-char *mbasename(const char *path)
-{
-	const char *s;
-	const char *p;
-
-	p = s = path;
-
-	while (*s) {
-		if (*s++ == '/') {
-			p = s;
-		}
-	}
-
-	return (char *)p;
-}
-
-//------------------------------------------------------------------
-/* Compression functions */
-/**
- * @brief Unpack a specific file or all files in an archive.
- *
- * @param archive  the archive to unpack
- * @param prefix   where to extract the files
- * @param fn       a file within the archive to unpack or NULL for all
- * @return 0 on success, 1 on failure
- */
-int am_unpack(const char *archive, const char *prefix, const char *fn)
-{
-	int ret = 0;
-	mode_t oldmask;
-	struct archive *_archive;
-	struct archive_entry *entry;
-	char cwd[PATH_MAX];
-	int restore_cwd = 0;
-
-	/* ALPM_LOG_FUNC; */
-    if (fn == NULL)
-        printf("ARCHIVE_INSIDE: %s, LOCATION: %s\n", archive, prefix);
-	if((_archive = archive_read_new()) == NULL)
-    printf("TEST1\n");
-		/* RET_ERR(PM_ERR_LIBARCHIVE, 1); */
-
-	archive_read_support_compression_all(_archive);
-	archive_read_support_format_all(_archive);
-
-	if(archive_read_open_filename(_archive, archive,
-				ARCHIVE_DEFAULT_BYTES_PER_BLOCK) != ARCHIVE_OK) {
-		/* _alpm_log(PM_LOG_ERROR, _("could not open %s: %s\n"), archive, */
-				/* archive_error_string(_archive)); */
-		/* RET_ERR(PM_ERR_PKG_OPEN, 1); */
-	}
-
-	oldmask = umask(0022);
-
-	/* save the cwd so we can restore it later */
-	if(getcwd(cwd, PATH_MAX) == NULL) {
-		/* _alpm_log(PM_LOG_ERROR, _("could not get current working directory\n")); */
-	} else {
-		restore_cwd = 1;
-	}
-
-	/* just in case our cwd was removed in the upgrade operation */
-	if(chdir(prefix) != 0) {
-		/* _alpm_log(PM_LOG_ERROR, _("could not change directory to %s (%s)\n"), prefix, strerror(errno)); */
-		ret = 1;
-		goto cleanup;
-	}
-
-	while(archive_read_next_header(_archive, &entry) == ARCHIVE_OK) {
-		const struct stat *st;
-		const char *entryname; /* the name of the file in the archive */
-
-		st = archive_entry_stat(entry);
-		entryname = archive_entry_pathname(entry);
-
-		if(S_ISREG(st->st_mode)) {
-			archive_entry_set_perm(entry, 0644);
-		} else if(S_ISDIR(st->st_mode)) {
-			archive_entry_set_perm(entry, 0755);
-		}
-
-		/* If a specific file was requested skip entries that don't match. */
-		if (fn && strcmp(fn, entryname)) {
-			/* _alpm_log(PM_LOG_DEBUG, "skipping: %s\n", entryname); */
-			if (archive_read_data_skip(_archive) != ARCHIVE_OK) {
-				ret = 1;
-				goto cleanup;
-			}
-			continue;
-		}
-
-		/* Extract the archive entry. */
-		int readret = archive_read_extract(_archive, entry, 0);
-		if(readret == ARCHIVE_WARN) {
-			/* operation succeeded but a non-critical error was encountered */
-			/* _alpm_log(PM_LOG_DEBUG, "warning extracting %s (%s)\n", */
-					/* entryname, archive_error_string(_archive)); */
-		} else if(readret != ARCHIVE_OK) {
-			/* _alpm_log(PM_LOG_ERROR, _("could not extract %s (%s)\n"), */
-					/* entryname, archive_error_string(_archive)); */
-			ret = 1;
-			goto cleanup;
-		}
-
-		if(fn) {
-			break;
-		}
-	}
-
-cleanup:
-	umask(oldmask);
-	archive_read_finish(_archive);
-	if(restore_cwd) {
-		chdir(cwd);
-	}
-	return(ret);
-}
-
 //------------------------------------------------------------------------------
 CURL *_am_handle_new()
 {
@@ -582,7 +404,7 @@ CURL *_am_handle_new()
 //------------------------------------------------------------------------------
 void _am_handle_free(CURL *handle)
 {
-	/* ALPM_LOG_FUNC; */
+	/* ALAM_LOG_FUNC; */
 
 	if(handle == NULL) {
 		return;
@@ -628,8 +450,6 @@ const char *categories[] = {
     "kernels",
 };
 
-extern enum _aurerrno_t aur_errno;
-
 //------------------------------------------------------------------
 int findix_cat(char *category)
 {
@@ -668,6 +488,7 @@ int am_login(CURL *handle)
     curl_easy_setopt(handle, CURLOPT_COOKIEFILE, tmp_str);
     curl_easy_setopt(handle, CURLOPT_COOKIEJAR, tmp_str);
     memset(tmp_str,0,sizeof(tmp_str));
+	printf("USER: %s, PASS: %s\n", user, pass);
     snprintf(tmp_str, sizeof(tmp_str), "user=%s&passwd=%s", user, pass);
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, tmp_str);
     curl_easy_setopt(handle, CURLOPT_URL, aur_main_url);
@@ -677,7 +498,7 @@ int am_login(CURL *handle)
 
 //------------------------------------------------------------------------------
 /*
-  @brief submits a package to aur
+ * @brief submits a package to aur
  *
  * @param handle AUR handler for that cURL session
  * @param url AUR url
@@ -734,7 +555,7 @@ size_t get_pkg_id(void *ptr, size_t size, size_t nmemb, void *stream)
 
 //------------------------------------------------------------------------------
 /*
-  @brief submits a package to aur
+ * @brief submits a package to aur
  *
  * @param handle AUR handler for that cURL session
  * @param url AUR url
@@ -829,33 +650,7 @@ int am_comment(CURL *handle)
 }
 
 //-------------------------------------------------------------------------
-#ifndef __GNUC__
-/* #ifndef HAVE_STRNDUP */
-/* A quick and dirty implementation derived from glibc */
-static size_t strnlen(const char *s, size_t max)
-{
-    register const char *p;
-    for(p = s; *p && max--; ++p);
-    return(p - s);
-}
-
-//-------------------------------------------------------------------------
-char *strndup(const char *s, size_t n)
-{
-  size_t len = strnlen(s, n);
-  char *new = (char *) malloc(len + 1);
-
-  if (new == NULL)
-    return NULL;
-
-  new[len] = '\0';
-  return (char *) memcpy(new, s, len);
-}
-#endif
-
-//-------------------------------------------------------------------------
 /** Display usage/syntax for the specified operation.
- * @param op     the operation code requested
  * @param myname basename(argv[0])
  */
 static void usage(const char * const myname)
@@ -866,7 +661,7 @@ static void usage(const char * const myname)
 	char const * const str_usg = _("usage");
 	char const * const str_opr = _("operation");
 
-    printf("Aurman %s is a pacman frontend with AUR support and more\n", PACKAGE_VERSION);
+    printf("Aurman %s is an AUR manager (based on pacman/libalam) with the desired support\n", PACKAGE_VERSION);
     printf("homepage: %s\n", HOMEPAGE);
     printf("      Copyright (C) 2009 Laszlo Papp <djszapi@archlinux.us>\n");
     printf("      This program may be freely redistributed under\n");
@@ -901,9 +696,8 @@ static void usage(const char * const myname)
 static void version(void)
 {
 	printf("\n");
-	printf("                      Aurman v%s - libalpm v%s\n", PACKAGE_VERSION, alpm_version());
+	printf("                      Aurman v%s - libalam v%s\n", PACKAGE_VERSION, alam_version());
 	printf("                      Copyright (C) 2009 Laszlo Papp <djszapi@archlinux.us>\n");
-	/* printf("\\  '-. '-'  '-'  '-'   Copyright (C) 2002-2006 Aurman * Development Team\n"); */
 	printf("\n");
 	printf(_("                    This program may be freely redistributed under\n"
 	         "                    the terms of the GNU General Public License.\n"));
@@ -950,31 +744,31 @@ int am_pkg_action(CURL *handle, int am_pkg_action_t) {
 
     memset(tmp_str, 0, sizeof(tmp_str));
     switch(am_pkg_action_t) {
-        case AM_PKG_ACTION_TYPE_VOTE:
+        case AM_LONG_OP_VOTE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Vote=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_UNVOTE:
+        case AM_LONG_OP_UNVOTE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnVote=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_FLAG:
+        case AM_LONG_OP_FLAG:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Flag=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_UNFLAG:
+        case AM_LONG_OP_UNFLAG:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnFlag=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_NOTIFY:
+        case AM_LONG_OP_NOTIFY:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Notify=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_UNNOTIFY:
+        case AM_LONG_OP_UNNOTIFY:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnNotify=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_ADOPT:
+        case AM_LONG_OP_ADOPT:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Adopt=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_DISOWN:
+        case AM_LONG_OP_DISOWN:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Disown=1", pkg_id, pkg_id);
             break;
-        case AM_PKG_ACTION_TYPE_DELETE:
+        case AM_LONG_OP_DELETE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Delete=1", pkg_id, pkg_id);
             break;
         default:
@@ -988,8 +782,452 @@ int am_pkg_action(CURL *handle, int am_pkg_action_t) {
     return 0;
 }
 
+//------------------------------------------------------------------
+/* helper for being used with setrepeatingoption */
+static void option_add_holdpkg(const char *name) {
+	config->holdpkg = alam_list_add(config->holdpkg, strdup(name));
+}
 
-char *global_arg_value;
+//------------------------------------------------------------------
+/* helper for being used with setrepeatingoption */
+static void option_add_syncfirst(const char *name) {
+	config->syncfirst = alam_list_add(config->syncfirst, strdup(name));
+}
+
+//------------------------------------------------------------------
+/** Add repeating options such as NoExtract, NoUpgrade, etc to libalam
+ * settings. Refactored out of the parseconfig code since all of them did
+ * the exact same thing and duplicated code.
+ * @param ptr a pointer to the start of the multiple options
+ * @param option the string (friendly) name of the option, used for messages
+ * @param optionfunc a function pointer to an alam_option_add_* function
+ */
+static void setrepeatingoption(const char *ptr, const char *option,
+		void (*optionfunc)(const char*))
+{
+	char *p = (char*)ptr;
+	char *q;
+
+	while((q = strchr(p, ' '))) {
+		*q = '\0';
+		(*optionfunc)(p);
+		am_printf(AM_LOG_DEBUG, "config: %s: %s\n", option, p);
+		p = q;
+		p++;
+	}
+	(*optionfunc)(p);
+	am_printf(AM_LOG_DEBUG, "config: %s: %s\n", option, p);
+}
+
+//------------------------------------------------------------------
+static char *get_filename(const char *url) {
+	char *filename = strrchr(url, '/');
+	if(filename != NULL) {
+		filename++;
+	}
+	return(filename);
+}
+
+//------------------------------------------------------------------
+static char *get_destfile(const char *path, const char *filename) {
+	char *destfile;
+	/* len = localpath len + filename len + null */
+	int len = strlen(path) + strlen(filename) + 1;
+	destfile = calloc(len, sizeof(char));
+	snprintf(destfile, len, "%s%s", path, filename);
+
+	return(destfile);
+}
+
+//------------------------------------------------------------------
+static char *get_tempfile(const char *path, const char *filename) {
+	char *tempfile;
+	/* len = localpath len + filename len + '.part' len + null */
+	int len = strlen(path) + strlen(filename) + 6;
+	tempfile = calloc(len, sizeof(char));
+	snprintf(tempfile, len, "%s%s.part", path, filename);
+
+	return(tempfile);
+}
+
+//------------------------------------------------------------------
+/** Sets all libalpm required paths in one go. Called after the command line
+ * and inital config file parsing. Once this is complete, we can see if any
+ * paths were defined. If a rootdir was defined and nothing else, we want all
+ * of our paths to live under the rootdir that was specified. Safe to call
+ * multiple times (will only do anything the first time).
+ */
+static void setlibpaths(void)
+{
+	static int init = 0;
+	if (!init) {
+		int ret = 0;
+
+		am_printf(AM_LOG_DEBUG, "setlibpaths() called\n");
+		/* Configure root path first. If it is set and dbpath/logfile were not
+		 * set, then set those as well to reside under the root. */
+		if(config->rootdir) {
+			char path[PATH_MAX];
+			ret = alam_option_set_root(config->rootdir);
+			if(ret != 0) {
+				am_printf(AM_LOG_ERROR, _("problem setting rootdir '%s' (%s)\n"),
+						config->rootdir, alam_strerrorlast());
+				cleanup(ret);
+			}
+			if(!config->dbpath) {
+				/* omit leading slash from our static DBPATH, root handles it */
+				snprintf(path, PATH_MAX, "%s%s", alam_option_get_root(), DBPATH + 1);
+				config->dbpath = strdup(path);
+			}
+			if(!config->logfile) {
+				/* omit leading slash from our static LOGFILE path, root handles it */
+				snprintf(path, PATH_MAX, "%s%s", alam_option_get_root(), LOGFILE + 1);
+				config->logfile = strdup(path);
+			}
+		}
+		/* Set other paths if they were configured. Note that unless rootdir
+		 * was left undefined, these two paths (dbpath and logfile) will have
+		 * been set locally above, so the if cases below will now trigger. */
+		if(config->dbpath) {
+			ret = alam_option_set_dbpath(config->dbpath);
+			if(ret != 0) {
+				am_printf(AM_LOG_ERROR, _("problem setting dbpath '%s' (%s)\n"),
+						config->dbpath, alam_strerrorlast());
+				cleanup(ret);
+			}
+		}
+		if(config->logfile) {
+			ret = alam_option_set_logfile(config->logfile);
+			if(ret != 0) {
+				am_printf(AM_LOG_ERROR, _("problem setting logfile '%s' (%s)\n"),
+						config->logfile, alam_strerrorlast());
+				cleanup(ret);
+			}
+		}
+
+		/* add a default cachedir if one wasn't specified */
+		if(alam_option_get_cachedirs() == NULL) {
+			alam_option_add_cachedir(CACHEDIR);
+		}
+		init = 1;
+	}
+}
+
+//------------------------------------------------------------------
+/* The real parseconfig. Called with a null section argument by the publicly
+ * visible parseconfig so we can recall from within ourself on an include */
+static int _parseconfig(const char *file, const char *givensection, amdb_t * const givendb)
+{
+	FILE *fp = NULL;
+	char line[PATH_MAX+1];
+	int linenum = 0;
+	char *ptr;
+	char *section = NULL;
+	amdb_t *db = NULL;
+	int ret = 0;
+
+	am_printf(AM_LOG_DEBUG, "config: attempting to read file %s\n", file);
+	fp = fopen(file, "r");
+	if(fp == NULL) {
+		am_printf(AM_LOG_ERROR, _("config file %s could not be read.\n"), file);
+		return(1);
+	}
+	/* if we are passed a section, use it as our starting point */
+	if(givensection != NULL) {
+		section = strdup(givensection);
+	}
+	/* if we are passed a db, use it as our starting point */
+	if(givendb != NULL) {
+		db = givendb;
+	}
+
+	while(fgets(line, PATH_MAX, fp)) {
+		linenum++;
+		strtrim(line);
+
+		/* ignore whole line and end of line comments */
+		if(strlen(line) == 0 || line[0] == '#') {
+			continue;
+		}
+		if((ptr = strchr(line, '#'))) {
+			*ptr = '\0';
+		}
+		if(line[0] == '[' && line[strlen(line)-1] == ']') {
+			/* new config section, skip the '[' */
+			ptr = line;
+			ptr++;
+			if(section) {
+				free(section);
+			}
+			section = strdup(ptr);
+			section[strlen(section)-1] = '\0';
+			am_printf(AM_LOG_DEBUG, "config: new section '%s'\n", section);
+			if(!strlen(section)) {
+				am_printf(AM_LOG_ERROR, _("config file %s, line %d: bad section name.\n"),
+						file, linenum);
+				ret = 1;
+				goto cleanup;
+			}
+			/* if we are not looking at the options section, register a db */
+			if(strcmp(section, "options") != 0) {
+				db = alam_db_register_sync(section);
+				if(db == NULL) {
+					am_printf(AM_LOG_ERROR, _("could not register '%s' database (%s)\n"),
+							section, alam_strerrorlast());
+					ret = 1;
+					goto cleanup;
+				}
+			}
+		} else {
+			/* directive */
+			char *key;
+			/* strsep modifies the 'line' string: 'key \0 ptr' */
+			key = line;
+			ptr = line;
+			strsep(&ptr, "=");
+			strtrim(key);
+			strtrim(ptr);
+
+			if(key == NULL) {
+				am_printf(AM_LOG_ERROR, _("config file %s, line %d: syntax error in config file- missing key.\n"),
+						file, linenum);
+				ret = 1;
+				goto cleanup;
+			}
+			/* For each directive, compare to the camelcase string. */
+			if(section == NULL) {
+				am_printf(AM_LOG_ERROR, _("config file %s, line %d: All directives must belong to a section.\n"),
+						file, linenum);
+				ret = 1;
+				goto cleanup;
+			}
+			if(ptr == NULL && strcmp(section, "options") == 0) {
+				/* directives without settings, all in [options] */
+				if(strcmp(key, "AlwaysUpgradeAur") == 0) {
+					alam_option_set_usesyslog(1);
+					am_printf(AM_LOG_DEBUG, "config: usesyslog\n");
+				} else if(strcmp(key, "AlwaysUpgradeDevel") == 0) {
+					config->chomp = 1;
+					am_printf(AM_LOG_DEBUG, "config: chomp\n");
+				} else if(strcmp(key, "AlwaysForce") == 0) {
+					config->showsize = 1;
+					am_printf(AM_LOG_DEBUG, "config: showsize\n");
+				} else if(strcmp(key, "AurVoteSupport") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "AutoSaveBackupFile") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "ColorMod") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "DontNeedToPressEnter") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "EditPkgbuild") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "ExportToLocalRepository") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "ForceEnglish") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "LastCommentsNumber") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "LastCommentsOrder") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "NoConfirm") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "PkgbuildEditor") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "SearchInAurUnsupported") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "TmpDirectory") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "SourceforgeMirror") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "UpdateTerminalTitle") == 0) {
+					alam_option_set_usedelta(1);
+					am_printf(AM_LOG_DEBUG, "config: usedelta\n");
+				} else if(strcmp(key, "PacmanBin") == 0) {
+					config->totaldownload = 1;
+					am_printf(AM_LOG_DEBUG, "config: totaldownload\n");
+				} else if(strcmp(key, "UseSyslog") == 0) {
+					config->totaldownload = 1;
+					am_printf(AM_LOG_DEBUG, "config: totaldownload\n");
+				} else if(strcmp(key, "ShowSize") == 0) {
+					config->totaldownload = 1;
+					am_printf(AM_LOG_DEBUG, "config: totaldownload\n");
+				} else if(strcmp(key, "UseDelta") == 0) {
+					config->totaldownload = 1;
+					am_printf(AM_LOG_DEBUG, "config: totaldownload\n");
+				} else if(strcmp(key, "TotalDownload") == 0) {
+					config->totaldownload = 1;
+					am_printf(AM_LOG_DEBUG, "config: totaldownload\n");
+				} else {
+					am_printf(AM_LOG_ERROR, _("config file %s, line %d: directive '%s' not recognized.\n"),
+							file, linenum, key);
+					ret = 1;
+					goto cleanup;
+				}
+			} else {
+				/* directives with settings */
+				if(strcmp(key, "Include") == 0) {
+					am_printf(AM_LOG_DEBUG, "config: including %s\n", ptr);
+					_parseconfig(ptr, section, db);
+					/* Ignore include failures... assume non-critical */
+				} else if(strcmp(section, "options") == 0) {
+					if(strcmp(key, "NoUpgrade") == 0) {
+						setrepeatingoption(ptr, "NoUpgrade", alam_option_add_noupgrade);
+					} else if(strcmp(key, "NoExtract") == 0) {
+						setrepeatingoption(ptr, "NoExtract", alam_option_add_noextract);
+					} else if(strcmp(key, "IgnorePkg") == 0) {
+						setrepeatingoption(ptr, "IgnorePkg", alam_option_add_ignorepkg);
+					} else if(strcmp(key, "IgnoreGroup") == 0) {
+						setrepeatingoption(ptr, "IgnoreGroup", alam_option_add_ignoregrp);
+					} else if(strcmp(key, "HoldPkg") == 0) {
+						setrepeatingoption(ptr, "HoldPkg", option_add_holdpkg);
+					} else if(strcmp(key, "SyncFirst") == 0) {
+						setrepeatingoption(ptr, "SyncFirst", option_add_syncfirst);
+					} else if(strcmp(key, "Architecture") == 0) {
+						if(!alam_option_get_arch()) {
+							setarch(ptr);
+						}
+					} else if(strcmp(key, "User") == 0) {
+						/* don't overwrite a path specified on the command line */
+						if(!config->user) {
+							config->user = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: User: %s\n", ptr);
+						}
+					} else if(strcmp(key, "Pass") == 0) {
+						/* don't overwrite a path specified on the command line */
+						if(!config->pass) {
+							config->pass = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: Pass: %s\n", ptr);
+						}
+					} else if(strcmp(key, "DownloadDir") == 0) {
+						/* don't overwrite a path specified on the command line */
+						if(!config->dl_dir) {
+							config->dl_dir = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: DownloadDir: %s\n", ptr);
+						}
+					} else if(strcmp(key, "DBPath") == 0) {
+						/* don't overwrite a path specified on the command line */
+						if(!config->dbpath) {
+							config->dbpath = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: dbpath: %s\n", ptr);
+						}
+					} else if(strcmp(key, "CacheDir") == 0) {
+						if(alam_option_add_cachedir(ptr) != 0) {
+							am_printf(AM_LOG_ERROR, _("problem adding cachedir '%s' (%s)\n"),
+									ptr, alam_strerrorlast());
+							ret = 1;
+							goto cleanup;
+						}
+						am_printf(AM_LOG_DEBUG, "config: cachedir: %s\n", ptr);
+					} else if(strcmp(key, "RootDir") == 0) {
+						/* don't overwrite a path specified on the command line */
+						if(!config->rootdir) {
+							config->rootdir = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: rootdir: %s\n", ptr);
+						}
+					} else if (strcmp(key, "LogFile") == 0) {
+						if(!config->logfile) {
+							config->logfile = strdup(ptr);
+							am_printf(AM_LOG_DEBUG, "config: logfile: %s\n", ptr);
+						}
+					/* } else if (strcmp(key, "XferCommand") == 0) { */
+						/* config->xfercommand = strdup(ptr); */
+						/* alam_option_set_fetchcb(download_with_xfercommand); */
+						/* am_printf(AM_LOG_DEBUG, "config: xfercommand: %s\n", ptr); */
+					} else if (strcmp(key, "CleanMethod") == 0) {
+						if (strcmp(ptr, "KeepInstalled") == 0) {
+							config->cleanmethod = AM_CLEAN_KEEPINST;
+						} else if (strcmp(ptr, "KeepCurrent") == 0) {
+							config->cleanmethod = AM_CLEAN_KEEPCUR;
+						} else {
+							am_printf(AM_LOG_ERROR, _("invalid value for 'CleanMethod' : '%s'\n"), ptr);
+							ret = 1;
+							goto cleanup;
+						}
+						am_printf(AM_LOG_DEBUG, "config: cleanmethod: %s\n", ptr);
+					} else {
+						am_printf(AM_LOG_ERROR, _("config file %s, line %d: directive '%s' not recognized.\n"),
+								file, linenum, key);
+						ret = 1;
+						goto cleanup;
+					}
+				} else if(strcmp(key, "Server") == 0) {
+					/* let's attempt a replacement for the current repo */
+					char *temp = strreplace(ptr, "$repo", section);
+					/* let's attempt a replacement for the arch */
+					const char *arch = alam_option_get_arch();
+					char *server;
+					if(arch) {
+						server = strreplace(temp, "$arch", arch);
+						free(temp);
+					} else {
+						if(strstr(temp, "$arch")) {
+							free(temp);
+							am_printf(AM_LOG_ERROR, _("The mirror '%s' contains the $arch"
+										" variable, but no Architecture is defined.\n"), ptr);
+							ret = 1;
+							goto cleanup;
+						}
+						server = temp;
+					}
+
+					if(alam_db_setserver(db, server) != 0) {
+						/* am_errno is set by alam_db_setserver */
+						am_printf(AM_LOG_ERROR, _("could not add server URL to database '%s': %s (%s)\n"),
+								alam_db_get_name(db), server, alam_strerrorlast());
+						free(server);
+						ret = 1;
+						goto cleanup;
+					}
+
+					free(server);
+				} else {
+					am_printf(AM_LOG_ERROR, _("config file %s, line %d: directive '%s' not recognized.\n"),
+							file, linenum, key);
+					ret = 1;
+					goto cleanup;
+				}
+			}
+		}
+	}
+cleanup:
+	if(fp) {
+		fclose(fp);
+	}
+	if(section){
+		free(section);
+	}
+	/* call setlibpaths here to ensure we have called it at least once */
+	setlibpaths();
+	am_printf(AM_LOG_DEBUG, "config: finished parsing %s\n", file);
+	return(ret);
+}
+
+//------------------------------------------------------------------
+/** Parse a configuration file.
+ * @param file path to the config file.
+ * @return 0 on success, non-zero on error
+ */
+static int parseconfig(const char *file)
+{
+	/* call the real parseconfig function with a null section & db argument */
+	return(_parseconfig(file, NULL, NULL));
+}
+
 //------------------------------------------------------------------
 /** Parse command-line arguments for each operation.
  * @param argc argc
@@ -1026,16 +1264,99 @@ static int parseargs(int argc, char *argv[])
 		{"category",            no_argument,       0,  AM_LONG_OP_CATEGORY},
 		{"download",            required_argument, 0,  AM_LONG_OP_DOWNLOAD},
 		{"comment",             required_argument, 0,  AM_LONG_OP_COMMENT},
+		{"noconfirm",  			no_argument,       0, AM_LONG_OP_NOCONFIRM},
+		{"config",     			required_argument, 0, AM_LONG_OP_CONFIG},
+		{"ignore",     			required_argument, 0, AM_LONG_OP_IGNORE},
+		{"debug",      			optional_argument, 0, AM_LONG_OP_DEBUG},
+		{"noprogressbar", 		no_argument,    	0, AM_LONG_OP_NOPROGRESSBAR},
+		{"noscriptlet", 		no_argument,      	0, AM_LONG_OP_NOSCRIPTLET},
+		{"ask",        			required_argument, 0, AM_LONG_OP_ASK},
+		{"cachedir",   			required_argument, 0, AM_LONG_OP_CACHEDIR},
+		{"asdeps",     			no_argument,       0, AM_LONG_OP_ASDEPS},
+		{"logfile",    			required_argument, 0, AM_LONG_OP_LOGFILE},
+		{"ignoregroup", 		required_argument, 0, AM_LONG_OP_IGNOREGROUP},
+		{"needed",     			no_argument,       0, AM_LONG_OP_NEEDED},
+		{"asexplicit",     		no_argument,   0, AM_LONG_OP_ASEXPLICIT},
+		{"arch",       			required_argument, 0, AM_LONG_OP_ARCH},
+
 		{0, 0, 0, 0}
 	};
 
 	while((opt = getopt_long(argc, argv, "RUFQSTr:b:vkhscVfmnoldepqituwygz", opts, &option_index))) {
-		/* alpm_list_t *list = NULL, *item = NULL; [> lists for splitting strings <] */
+		alam_list_t *list = NULL, *item = NULL; /* lists for splitting strings */
 
 		if(opt < 0) {
 			break;
 		}
 		switch(opt) {
+			case AM_LONG_OP_NOCONFIRM: config->noconfirm = 1; break;
+			case AM_LONG_OP_CONFIG:
+				if(config->configfile) {
+					free(config->configfile);
+				}
+				config->configfile = strndup(optarg, PATH_MAX);
+				break;
+			case AM_LONG_OP_IGNORE:
+				list = strsplit(optarg, ',');
+				for(item = list; item; item = alam_list_next(item)) {
+					alam_option_add_ignorepkg((char *)alam_list_getdata(item));
+				}
+				FREELIST(list);
+				break;
+			case AM_LONG_OP_DEBUG:
+				/* debug levels are made more 'human readable' than using a raw logmask
+				 * here, error and warning are set in config_new, though perhaps a
+				 * --quiet option will remove these later */
+				if(optarg) {
+					unsigned short debug = atoi(optarg);
+					switch(debug) {
+						case 2:
+							config->logmask |= AM_LOG_FUNCTION; /* fall through */
+						case 1:
+							config->logmask |= AM_LOG_DEBUG;
+							break;
+						default:
+						  am_printf(AM_LOG_ERROR, _("'%s' is not a valid debug level\n"),
+									optarg);
+							return(1);
+					}
+				} else {
+					config->logmask |= AM_LOG_DEBUG;
+				}
+				/* progress bars get wonky with debug on, shut them off */
+				config->noprogressbar = 1;
+				break;
+			case AM_LONG_OP_NOPROGRESSBAR: config->noprogressbar = 1; break;
+			case AM_LONG_OP_NOSCRIPTLET: config->flags |= AM_TRANS_FLAG_NOSCRIPTLET; break;
+			case AM_LONG_OP_ASK: config->noask = 1; config->ask = atoi(optarg); break;
+			case AM_LONG_OP_CACHEDIR:
+				if(alam_option_add_cachedir(optarg) != 0) {
+					am_printf(AM_LOG_ERROR, _("problem adding cachedir '%s' (%s)\n"),
+							optarg, alam_strerrorlast());
+					return(1);
+				}
+				break;
+			case AM_LONG_OP_ASDEPS:
+				config->flags |= AM_TRANS_FLAG_ALLDEPS;
+				break;
+			case AM_LONG_OP_LOGFILE:
+				config->logfile = strndup(optarg, PATH_MAX);
+				break;
+			case AM_LONG_OP_IGNOREGROUP:
+				list = strsplit(optarg, ',');
+				for(item = list; item; item = alam_list_next(item)) {
+					alam_option_add_ignoregrp((char *)alam_list_getdata(item));
+				}
+				FREELIST(list);
+				break;
+			case AM_LONG_OP_NEEDED: config->flags |= AM_TRANS_FLAG_NEEDED; break;
+			case AM_LONG_OP_ASEXPLICIT:
+				config->flags |= AM_TRANS_FLAG_ALLEXPLICIT;
+				break;
+			case AM_LONG_OP_ARCH:
+				setarch(optarg);
+				break;
+
             case AM_LONG_OP_VOTE:
                 pkg_action_id = AM_LONG_OP_VOTE;
                 pkg_name = strdup(optarg);
@@ -1090,7 +1411,7 @@ static int parseargs(int argc, char *argv[])
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
             case 'h':
-		        usage(mbasename(argv[0]));
+				usage(mbasename(argv[0]));
                 break;
             case 'V':
                 version();
@@ -1105,11 +1426,11 @@ static int parseargs(int argc, char *argv[])
 
 	while(optind < argc) {
 		/* add the target to our target array */
-		am_targets = alpm_list_add(am_targets, strdup(argv[optind]));
+		am_targets = alam_list_add(am_targets, strdup(argv[optind]));
 		optind++;
 	}
 
-    return(0);
+    return(1);
 }
 
 //------------------------------------------------------------------
@@ -1126,6 +1447,31 @@ int am_aur (int argc, char *argv[])
     };
 
     handle = _am_handle_new();
+
+
+	/* init config data */
+	config = config_new();
+
+	/* Priority of options:
+	 * 1. command line
+	 * 2. config file
+	 * 3. compiled-in defaults
+	 * However, we have to parse the command line first because a config file
+	 * location can be specified here, so we need to make sure we prefer these
+	 * options over the config file coming second.
+	 */
+
+	/* parse the command line */
+	ret = parseargs(argc, argv);
+	if(!ret) {
+		return -1;
+	}
+
+	/* parse the config file */
+	ret = parseconfig(config->configfile);
+	if(ret != 0) {
+		cleanup(ret);
+	}
 
     memset(tmp_str, 0, sizeof(tmp_str));
     snprintf(tmp_str, sizeof(tmp_str), "%s/.aurmanrc", getenv("HOME"));
@@ -1156,24 +1502,6 @@ int am_aur (int argc, char *argv[])
         strncpy(dl_location, &tmp_str[strlen("download=")], sizeof(pass));
         fclose(aurman_conf_file);
     }
-
-	/* init config data */
-	config = config_new();
-
-	/* Priority of options:
-	 * 1. command line
-	 * 2. config file
-	 * 3. compiled-in defaults
-	 * However, we have to parse the command line first because a config file
-	 * location can be specified here, so we need to make sure we prefer these
-	 * options over the config file coming second.
-	 */
-
-	/* parse the command line */
-	ret = parseargs(argc, argv);
-	if(!ret) {
-		return -1;
-	}
 
     if (argv[1] != NULL) {
         snprintf(pkg_sample, sizeof(pkg_sample), "%s\",", pkg_name);
@@ -1221,7 +1549,7 @@ int am_aur (int argc, char *argv[])
         }
         if(httpfile.stream)
             fclose(httpfile.stream); /* close the local file */
-        am_unpack(pkg_archive, ".", NULL);
+        alam_unpack(pkg_archive, ".", NULL);
     }
 
     if (config->am_comment) {
@@ -1275,7 +1603,7 @@ int main (int argc, char *argv[])
 	}
 	command = mbasename(argv[0]);
 	printf(_("Usage: %s <am|pm|mp> [operation e.g: -h, --help...]\n"), command);
-	printf("\tam: AUR, pm: pacman, mp: makepkg\n");
+	printf("\tam: AUR, pm: pacman, mp: makepkg related operations\n");
 	return -1;
 }
 

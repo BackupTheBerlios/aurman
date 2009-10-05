@@ -1,0 +1,26 @@
+# List of source files with translatable strings
+# If a file is commented out, it is because it shouldn't have any
+# translatable strings
+
+# lib/libalpm/add.c
+lib/libalam/alam.c
+lib/libalam/alam_list.c
+# lib/libalam/backup.c
+# lib/libalam/be_files.c
+# lib/libalam/be_package.c
+# lib/libalam/cache.c
+# lib/libalam/conflict.c
+# lib/libalam/db.c
+# lib/libalam/delta.c
+# lib/libalam/deps.c
+# lib/libalam/dload.c
+# lib/libalam/error.c
+# lib/libalam/group.c
+# lib/libalam/handle.c
+# lib/libalam/log.c
+#lib/libalam/md5.c
+# lib/libalam/package.c
+# lib/libalam/remove.c
+# lib/libalam/sync.c
+# lib/libalam/trans.c
+# lib/libalam/util.c

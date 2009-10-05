@@ -1,7 +1,7 @@
 # paths set at make time
 conffile  = ${sysconfdir}/aurmanrc
-dbpath    = ${localstatedir}/lib/pacman/
-cachedir  = ${localstatedir}/cache/pacman/pkg/
+dbpath    = ${localstatedir}/lib/aurman/
+cachedir  = ${localstatedir}/cache/aurman/pkg/
 logfile   = ${localstatedir}/log/aurman.log
 
 bin_PROGRAMS = aurman
@@ -13,9 +13,9 @@ DEFS = -DLOCALEDIR=\"@localedir@\" \
        -DCACHEDIR=\"$(cachedir)\" \
        -DLOGFILE=\"$(logfile)\" \
        @DEFS@
-INCLUDES = -I$(top_srcdir)/lib/libalpm
+INCLUDES = -I$(top_srcdir)/lib/libalam
 
-AM_CFLAGS = -pedantic -D_GNU_SOURCE -lcurl -larchive -lalpm
+AM_CFLAGS = -pedantic -D_GNU_SOURCE -lcurl
 
 if USE_GIT_VERSION
 GIT_VERSION := $(shell sh -c 'git describe --abbrev=4 | sed s/^v//')-dirty
@@ -29,6 +29,6 @@ aurman_SOURCES = \
 	util.h util.c
 
 
-## LDADD = $(LTLIBINTL) $(top_builddir)/lib/libalpm/.libs/libalpm.la
+LDADD = $(LTLIBINTL) $(top_builddir)/lib/libalam/.libs/libalam.la
 
 # vim:set ts=2 sw=2 noet:

@@ -11,7 +11,7 @@ DEFS = -DLOCALEDIR=\"@localedir@\" \
        -DDBPATH=\"$(dbpath)\" \
        -DCACHEDIR=\"$(cachedir)\" \
        @DEFS@
-INCLUDES = -I$(top_srcdir)/lib/libalpm
+INCLUDES = -I$(top_srcdir)/lib/libalam
 
 AM_CFLAGS = -pedantic -D_GNU_SOURCE
 

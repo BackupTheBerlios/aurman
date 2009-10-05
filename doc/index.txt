@@ -29,7 +29,7 @@ There are several manpages available for the programs, utilities, and
 configuration files dealing with pacman.
 
 * linkman:PKGBUILD[5]
-* linkman:libalpm[3]
+* linkman:libalam[3]
 * linkman:makepkg[8]
 * linkman:makepkg.conf[5]
 * linkman:pacman[8]
@@ -127,12 +127,12 @@ You can also post a bug to the Archlinux bug tracker
 link:http://bugs.archlinux.org/index.php?project=3[Flyspray]. Be sure to file
 bugs under the Pacman project.
 
-Aurman/libalpm in the Wild
+Aurman/libalam in the Wild
 --------------------------
-Although Arch Linux is the primary user of aurman and libalpm, other
+Although Arch Linux is the primary user of aurman and libalam, other
 distributions and projects also use pacman as a package management tool. In
 addition, there have been several projects started to provide a frontend GUI to
-aurman and/or libalpm.
+aurman and/or libalam.
 
 Arch derivatives:
 
@@ -145,9 +145,9 @@ Other distributions:
 * link:http://www.delilinux.org/[DeLi Linux] - "Desktop Light" Linux, a Linux distribution for old computers
 * link:http://www.frugalware.org/[Frugalware Linux] - A general purpose Linux distribution for intermediate users (pacman is forked and maintained separately)
 
-Aurman/libalpm frontends:
+Aurman/libalam frontends:
 
-* link:http://shaman.iskrembilen.com/[Shaman] - A GUI frontend using Qt and libalpm
+* link:http://shaman.iskrembilen.com/[Shaman] - A GUI frontend using Qt and libalam
 
 Copyright
 ---------

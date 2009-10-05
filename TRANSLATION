@@ -3,7 +3,7 @@ Overview
 
 There are two separate message catalogs in aurman- one for the backend (???) and
 one for the frontend (aurman and scripts). These correspond to the
-lib/libalpm/po and po directories in the aurman source, respectively.
+lib/libalam/po and po directories in the aurman source, respectively.
 
 Translation message files are a specially formatted text file containing the original message and the corresponding translation. These po files can then either be hand edited, or modified with a tool such as poedit, gtranslator or kbabel. Using a translation tool tends to make the job easier.
 
@@ -28,9 +28,9 @@ git clone git://projects.archlinux.org/aurman.git aurman
 
 Next, you will need to run ./autogen.sh and ./configure in the base directory to generate the correct Makefiles. At this point, all necessary make targets will be generated and we can begin updating the translation files.
 
-We need to first update the main message catalog file. Navigate into either the lib/libalpm/po or po directory depending on which translation you wish to work on first, and execute the following command. If you are working in the po/ tree, replace libalpm.pot with pacman.pot:
+We need to first update the main message catalog file. Navigate into either the lib/libalam/po or po directory depending on which translation you wish to work on first, and execute the following command. If you are working in the po/ tree, replace libalam.pot with pacman.pot:
 
-make libalpm.pot-update
+make libalam.pot-update
 
 Next, update your specific language’s translation file:
 
@@ -45,10 +45,10 @@ make update-po
 Adding a New Language
 
 Making a new language is not too hard, but be sure to follow all the steps. You
-will have to do the following steps in both the lib/libalpm/po/ and po/
+will have to do the following steps in both the lib/libalam/po/ and po/
 directories, substituting where appropriate. First, edit the LINGUAS file and
 add your new language code at the bottom. Next, run the following command,
-    substituting libalpm.pot or auraman.pot for potfile depending on which directory you are currently working in:
+    substituting libalam.pot or auraman.pot for potfile depending on which directory you are currently working in:
 
 msginit -l <lang code> -o <lang code>.po -i <potfile>
 

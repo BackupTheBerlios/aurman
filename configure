@@ -817,6 +817,8 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
+LIB_VERSION_INFO
+LIB_VERSION
 am__untar
 am__tar
 AMTAR
@@ -3007,6 +3009,19 @@ am__tar='${AMTAR} chof - "$$tardir"'; am__untar='${AMTAR} xf -'
 
 
 
+LIB_VERSION=`expr 4 - 0`.0.1
+LIB_VERSION_INFO="4:1:0"
+
+# Set subsitution values for version stuff in Makefiles and anywhere else,
+# and put LIB_VERSION in config.h
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define LIB_VERSION "$LIB_VERSION"
+_ACEOF
+
+
 # Help line for root directory
 
 # Check whether --with-root-dir was given.
@@ -5001,7 +5016,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5004 "configure"' > conftest.$ac_ext
+  echo '#line 5019 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6404,11 +6419,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6407: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6422: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6411: \$? = $ac_status" >&5
+   echo "$as_me:6426: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -6692,11 +6707,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6695: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6710: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6699: \$? = $ac_status" >&5
+   echo "$as_me:6714: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -6796,11 +6811,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6799: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6814: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:6803: \$? = $ac_status" >&5
+   echo "$as_me:6818: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8804,7 +8819,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8807 "configure"
+#line 8822 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -8904,7 +8919,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 8907 "configure"
+#line 8922 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12149,56 +12164,6 @@ else
 fi
 
 
-# Check for libalpm
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for alpm_version in -lalpm" >&5
-$as_echo_n "checking for alpm_version in -lalpm... " >&6; }
-if test "${ac_cv_lib_alpm_alpm_version+set}" = set; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lalpm  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char alpm_version ();
-int
-main ()
-{
-return alpm_version ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_alpm_alpm_version=yes
-else
-  ac_cv_lib_alpm_alpm_version=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_alpm_alpm_version" >&5
-$as_echo "$ac_cv_lib_alpm_alpm_version" >&6; }
-if test "x$ac_cv_lib_alpm_alpm_version" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_LIBALPM 1
-_ACEOF
-
-  LIBS="-lalpm $LIBS"
-
-else
-  as_fn_error "libalpm is needed to compile aurman!" "$LINENO" 5
-fi
-
-
-
 # Checks for header files.
 for ac_header in fcntl.h libintl.h limits.h locale.h string.h strings.h sys/ioctl.h sys/param.h sys/statvfs.h sys/syslimits.h sys/time.h syslog.h wchar.h
 do :
@@ -13695,7 +13660,7 @@ _ACEOF
 
 
 # Configuration files
-ac_config_files="$ac_config_files src/aurman/Makefile src/util/Makefile scripts/Makefile doc/Makefile etc/Makefile po/Makefile.in contrib/Makefile Makefile"
+ac_config_files="$ac_config_files lib/libalam/Makefile lib/libalam/po/Makefile.in src/aurman/Makefile src/util/Makefile scripts/Makefile doc/Makefile etc/Makefile po/Makefile.in contrib/Makefile Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -14441,6 +14406,8 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "po-directories") CONFIG_COMMANDS="$CONFIG_COMMANDS po-directories" ;;
+    "lib/libalam/Makefile") CONFIG_FILES="$CONFIG_FILES lib/libalam/Makefile" ;;
+    "lib/libalam/po/Makefile.in") CONFIG_FILES="$CONFIG_FILES lib/libalam/po/Makefile.in" ;;
     "src/aurman/Makefile") CONFIG_FILES="$CONFIG_FILES src/aurman/Makefile" ;;
     "src/util/Makefile") CONFIG_FILES="$CONFIG_FILES src/util/Makefile" ;;
     "scripts/Makefile") CONFIG_FILES="$CONFIG_FILES scripts/Makefile" ;;
@@ -15289,8 +15256,8 @@ ${PACKAGE_NAME}:
     sysconfdir             : $(eval echo ${sysconfdir})
        conf file           : $(eval echo ${sysconfdir})/aurmanrc
     localstatedir          : $(eval echo ${localstatedir})
-       database dir        : $(eval echo ${localstatedir})/lib/pacman/
-       cache dir           : $(eval echo ${localstatedir})/cache/pacman/pkg/
+       database dir        : $(eval echo ${localstatedir})/lib/aurman/
+       cache dir           : $(eval echo ${localstatedir})/cache/aurman/pkg/
     compiler               : ${CC}
     compiler flags         : ${CFLAGS}
     defines                : ${DEFS}

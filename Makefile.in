@@ -90,7 +90,8 @@ AM_RECURSIVE_TARGETS = $(RECURSIVE_TARGETS:-recursive=) \
 	distdir dist dist-all distcheck
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = src/util src/aurman scripts etc po contrib doc
+DIST_SUBDIRS = lib/libalam src/util src/aurman scripts etc po contrib \
+	doc
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -175,6 +176,8 @@ LIBINTL = @LIBINTL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_VERSION = @LIB_VERSION@
+LIB_VERSION_INFO = @LIB_VERSION_INFO@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBINTL = @LTLIBINTL@
@@ -260,7 +263,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src/util src/aurman scripts etc po contrib $(am__append_1)
+SUBDIRS = lib/libalam src/util src/aurman scripts etc po contrib \
+	$(am__append_1)
 
 # Make sure we test and build manpages when doing distcheck
 DISTCHECK_CONFIGURE_FLAGS = --enable-doc --disable-git-version

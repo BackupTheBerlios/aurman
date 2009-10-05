@@ -53,6 +53,9 @@ am_aurman_OBJECTS = conf.$(OBJEXT) db.$(OBJEXT) aurman.$(OBJEXT) \
 	util.$(OBJEXT)
 aurman_OBJECTS = $(am_aurman_OBJECTS)
 aurman_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+aurman_DEPENDENCIES = $(am__DEPENDENCIES_1) \
+	$(top_builddir)/lib/libalam/.libs/libalam.la
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -119,6 +122,8 @@ LIBINTL = @LIBINTL@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIB_VERSION = @LIB_VERSION@
+LIB_VERSION_INFO = @LIB_VERSION_INFO@
 LN_S = @LN_S@
 LTLIBICONV = @LTLIBICONV@
 LTLIBINTL = @LTLIBINTL@
@@ -207,11 +212,11 @@ top_srcdir = @top_srcdir@
 
 # paths set at make time
 conffile = ${sysconfdir}/aurmanrc
-dbpath = ${localstatedir}/lib/pacman/
-cachedir = ${localstatedir}/cache/pacman/pkg/
+dbpath = ${localstatedir}/lib/aurman/
+cachedir = ${localstatedir}/cache/aurman/pkg/
 logfile = ${localstatedir}/log/aurman.log
-INCLUDES = -I$(top_srcdir)/lib/libalpm
-AM_CFLAGS = -pedantic -D_GNU_SOURCE -lcurl -larchive -lalpm
+INCLUDES = -I$(top_srcdir)/lib/libalam
+AM_CFLAGS = -pedantic -D_GNU_SOURCE -lcurl
 @USE_GIT_VERSION_TRUE@GIT_VERSION := $(shell sh -c 'git describe --abbrev=4 | sed s/^v//')-dirty
 aurman_SOURCES = \
 	conf.h conf.c \
@@ -219,6 +224,7 @@ aurman_SOURCES = \
 	aurman.h aurman.c \
 	util.h util.c
 
+LDADD = $(LTLIBINTL) $(top_builddir)/lib/libalam/.libs/libalam.la
 all: all-am
 
 .SUFFIXES:

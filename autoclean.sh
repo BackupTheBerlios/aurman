@@ -11,7 +11,7 @@ rm -f aclocal.m4
 rm -f compile
 rm -f libtool
 
-rm -f lib/libalpm/{Makefile.in,Makefile}
+rm -f lib/libalam/{Makefile.in,Makefile}
 rm -f src/util/{Makefile.in,Makefile}
 rm -f src/aurman/{Makefile.in,Makefile}
 rm -f scripts/{Makefile.in,Makefile}

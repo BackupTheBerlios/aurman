@@ -1,4 +1,4 @@
-SUBDIRS =  src/util src/aurman scripts etc po contrib
+SUBDIRS =  lib/libalam src/util src/aurman scripts etc po contrib
 if WANT_DOC
 SUBDIRS += doc
 endif

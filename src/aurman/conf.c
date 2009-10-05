@@ -24,7 +24,8 @@
 #include <stdio.h>
 #include <string.h> /* strdup */
 
-/* pacman */
+
+/* aurman */
 #include "conf.h"
 #include "util.h"
 

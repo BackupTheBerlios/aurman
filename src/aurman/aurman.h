@@ -19,7 +19,7 @@
 #ifndef _AM_AURMAN_H
 #define _AM_AURMAN_H
 
-#include <alpm_list.h>
+#include <alam_list.h>
 
 #define PACKAGE_VERSION "1.0"
 #define HOMEPAGE				"http://developer.berlios.de/projects/aurman/"
@@ -32,7 +32,7 @@
 #define _(str) str
 #endif
 
-#endif /* _PM_PACMAN_H */
+#endif /* _AM_PACMAN_H */
 
 /* vim: set ts=2 sw=2 noet: */
 

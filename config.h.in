@@ -55,9 +55,6 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the `alpm' library (-lalpm). */
-#undef HAVE_LIBALPM
-
 /* Define to 1 if you have the `archive' library (-larchive). */
 #undef HAVE_LIBARCHIVE
 
@@ -159,6 +156,9 @@
 
 /* Define to 1 if `vfork' works. */
 #undef HAVE_WORKING_VFORK
+
+/* libalam version number */
+#undef LIB_VERSION
 
 /* Define to 1 if `lstat' dereferences a symlink specified with a trailing
    slash. */

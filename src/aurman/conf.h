@@ -19,7 +19,7 @@
 #ifndef _AM_CONF_H
 #define _AM_CONF_H
 
-#include <alpm.h>
+#include <alam.h>
 
 typedef struct __config_t {
 	unsigned short op;
@@ -37,6 +37,10 @@ typedef struct __config_t {
 	char *rootdir;
 	char *dbpath;
 	char *logfile;
+
+	char *user;
+	char *pass;
+	char *dl_dir;
 	/* TODO how to handle cachedirs? */
 
 	unsigned short op_q_isfile;
@@ -66,7 +70,7 @@ typedef struct __config_t {
 	unsigned short am_newpackages;
 
 	unsigned short group;
-	pmtransflag_t flags;
+	amtransflag_t flags;
 	unsigned short noask;
 	unsigned int ask;
 
@@ -77,19 +81,19 @@ typedef struct __config_t {
 	 * downloaded of the total download list */
 	unsigned short totaldownload;
 	unsigned short cleanmethod; /* select -Sc behavior */
-	alpm_list_t *holdpkg;
-	alpm_list_t *syncfirst;
+	alam_list_t *holdpkg;
+	alam_list_t *syncfirst;
 	char *xfercommand;
 } config_t;
 
 /* Operations */
 enum {
-	PM_OP_MAIN = 1,
-	PM_OP_REMOVE,
-	PM_OP_UPGRADE,
-	PM_OP_QUERY,
-	PM_OP_SYNC,
-	PM_OP_DEPTEST
+	AM_OP_MAIN = 1,
+	AM_OP_REMOVE,
+	AM_OP_UPGRADE,
+	AM_OP_QUERY,
+	AM_OP_SYNC,
+	AM_OP_DEPTEST
 };
 
 /* Long Operations */
@@ -115,13 +119,27 @@ enum {
 	AM_LONG_OP_PKGSUBMIT,
 	AM_LONG_OP_CATEGORY,
 	AM_LONG_OP_DOWNLOAD,
-	AM_LONG_OP_COMMENT
+	AM_LONG_OP_COMMENT,
+	AM_LONG_OP_NOCONFIRM,
+	AM_LONG_OP_CONFIG,
+	AM_LONG_OP_IGNORE,
+	AM_LONG_OP_DEBUG,
+	AM_LONG_OP_NOPROGRESSBAR,
+	AM_LONG_OP_NOSCRIPTLET,
+	AM_LONG_OP_ASK,
+	AM_LONG_OP_CACHEDIR,
+	AM_LONG_OP_ASDEPS,
+	AM_LONG_OP_LOGFILE,
+	AM_LONG_OP_IGNOREGROUP,
+	AM_LONG_OP_NEEDED,
+	AM_LONG_OP_ASEXPLICIT,
+	AM_LONG_OP_ARCH
 };
 
 /* clean method */
 enum {
-	PM_CLEAN_KEEPINST = 0, /* default */
-	PM_CLEAN_KEEPCUR
+	AM_CLEAN_KEEPINST = 0, /* default */
+	AM_CLEAN_KEEPCUR
 };
 
 /* global config variable */

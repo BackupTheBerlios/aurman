@@ -5,7 +5,7 @@ AC_PREREQ(2.60)
 
 # UPDATING VERSION NUMBERS FOR RELEASES
 #
-# libalpm:
+# libalam:
 # current
 #   The most recent interface number that this library implements.
 # revision
@@ -41,6 +41,10 @@ AC_PREREQ(2.60)
 #   Bugfix releases:
 #     aurman_version_micro += 1
 
+m4_define([lib_current], [4])
+m4_define([lib_revision], [1])
+m4_define([lib_age], [0])
+
 m4_define([aurman_version_major], [1])
 m4_define([aurman_version_minor], [0])
 m4_define([aurman_version_micro], [0])
@@ -54,6 +58,15 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_CANONICAL_HOST
 AM_INIT_AUTOMAKE
+
+LIB_VERSION=`expr lib_current - lib_age`.lib_age.lib_revision
+LIB_VERSION_INFO="lib_current:lib_revision:lib_age"
+
+# Set subsitution values for version stuff in Makefiles and anywhere else,
+# and put LIB_VERSION in config.h
+AC_SUBST(LIB_VERSION)
+AC_SUBST(LIB_VERSION_INFO)
+AC_DEFINE_UNQUOTED([LIB_VERSION], ["$LIB_VERSION"], [libalam version number])
 
 # Help line for root directory
 AC_ARG_WITH(root-dir,
@@ -126,11 +139,6 @@ AC_CHECK_LIB([archive], [archive_read_data], ,
 # Check for libcurl
 AC_CHECK_LIB([curl], [curl_easy_setopt], ,
 	AC_MSG_ERROR([libcurl is needed to compile aurman!]))
-
-# Check for libalpm
-AC_CHECK_LIB([alpm], [alpm_version], ,
-	AC_MSG_ERROR([libalpm is needed to compile aurman!]))
-
 
 # Checks for header files.
 AC_CHECK_HEADERS([fcntl.h libintl.h limits.h locale.h string.h strings.h sys/ioctl.h sys/param.h sys/statvfs.h sys/syslimits.h sys/time.h syslog.h wchar.h])
@@ -309,6 +317,8 @@ AC_DEFINE_UNQUOTED([BUILDSCRIPT], "$BUILDSCRIPT", [The build script name used by
 
 # Configuration files
 AC_CONFIG_FILES([
+lib/libalam/Makefile
+lib/libalam/po/Makefile.in
 src/aurman/Makefile
 src/util/Makefile
 scripts/Makefile
@@ -329,8 +339,8 @@ ${PACKAGE_NAME}:
     sysconfdir             : $(eval echo ${sysconfdir})
        conf file           : $(eval echo ${sysconfdir})/aurmanrc
     localstatedir          : $(eval echo ${localstatedir})
-       database dir        : $(eval echo ${localstatedir})/lib/pacman/
-       cache dir           : $(eval echo ${localstatedir})/cache/pacman/pkg/
+       database dir        : $(eval echo ${localstatedir})/lib/aurman/
+       cache dir           : $(eval echo ${localstatedir})/cache/aurman/pkg/
     compiler               : ${CC}
     compiler flags         : ${CFLAGS}
     defines                : ${DEFS}

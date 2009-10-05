@@ -49,7 +49,7 @@ OPERATIONS
 
        -B, --backup [file.tar.bz2]
               Restore  a  previous backup of the pacman database. Yaourt analyse the backup first and shows the differences
-              with the current alpm db. You have to type "yes" to replace the database by the old one. Actual  database  is
+              with the current alam db. You have to type "yes" to replace the database by the old one. Actual  database  is
               automatically saved in /tmp/ folder.
 
        -C, --clean

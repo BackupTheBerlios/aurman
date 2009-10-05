@@ -58,6 +58,9 @@
 /* Define to 1 if you have the `archive' library (-larchive). */
 #undef HAVE_LIBARCHIVE
 
+/* Define to 1 if you have the `curl' library (-lcurl). */
+#undef HAVE_LIBCURL
+
 /* Define to 1 if you have the <libintl.h> header file. */
 #undef HAVE_LIBINTL_H
 
