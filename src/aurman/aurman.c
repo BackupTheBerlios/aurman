@@ -461,6 +461,7 @@ int findix_cat(char *category)
     }
     return(ix+1);
 }
+
 //------------------------------------------------------------------
 bool file_exists(const char *filename)
 {
@@ -1262,7 +1263,7 @@ static int parseargs(int argc, char *argv[])
 		{"mypackages",          required_argument, 0,  AM_LONG_OP_MYPACKAGES},
 		{"listcat",             no_argument,       0,  AM_LONG_OP_LISTCAT},
 		{"pkgsubmit",           required_argument, 0,  AM_LONG_OP_PKGSUBMIT},
-		{"category",            no_argument,       0,  AM_LONG_OP_CATEGORY},
+		{"category",            required_argument, 0,  AM_LONG_OP_CATEGORY},
 		{"download",            required_argument, 0,  AM_LONG_OP_DOWNLOAD},
 		{"comment",             required_argument, 0,  AM_LONG_OP_COMMENT},
 		{"noconfirm",  			no_argument,       0, AM_LONG_OP_NOCONFIRM},
@@ -1391,17 +1392,23 @@ static int parseargs(int argc, char *argv[])
                 pkg_name = strdup(optarg);
                 break;
             case AM_LONG_OP_USER:
-                memset(user, 0, sizeof(user));
-                strncpy(user, optarg, sizeof(optarg));
+				if(config->user) {
+					free(config->user);
+				}
+                config->user = strndup(optarg, PATH_MAX);
                 break;
             case AM_LONG_OP_PASS:
-                memset(pass, 0, sizeof(pass));
-                strncpy(pass, optarg, sizeof(optarg));
+				if(config->pass) {
+					free(config->pass);
+				}
+                config->pass = strndup(optarg, PATH_MAX);
                 break;
             case AM_LONG_OP_PKGSUBMIT:
                 config->am_pkgsubmit = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
+				break;
             case AM_LONG_OP_CATEGORY:
+				config->category = strndup(optarg, PATH_MAX);
                 break;
             case AM_LONG_OP_DOWNLOAD:
                 config->am_downloadonly = 1;
@@ -1438,6 +1445,7 @@ static int parseargs(int argc, char *argv[])
 int am_aur (int argc, char *argv[])
 {
     int ret = 0;
+	char catix[10] = "";
     FILE *aurman_conf_file = NULL;
     char tmp_str[200] = "";
     char pkg_archive[200] = "";
@@ -1530,7 +1538,8 @@ int am_aur (int argc, char *argv[])
 
     if (config->am_pkgsubmit) {
         am_login(handle);
-        am_pkgsubmit (handle, aur_submit_url, pkg_name, "3", &res);
+		snprintf(catix, sizeof(catix), "%i", findix_cat(config->category));
+        am_pkgsubmit (handle, aur_submit_url, pkg_name, catix, &res);
     }
 
     if (config->am_downloadonly) {
