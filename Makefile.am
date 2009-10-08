@@ -14,4 +14,10 @@ EXTRA_DIST = HACKING
 pkgdatadir = ${datadir}/${PACKAGE}
 dist_pkgdata_DATA =  ChangeLog.proto
 
+# create the aurman DB and cache directories upon install
+install-data-local:
+	for dir in "$(DESTDIR)$(localstatedir)/lib/aurman" "$(DESTDIR)$(localstatedir)/cache/aurman/pkg"; do \
+	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
+	done
+
 # vim:set ts=2 sw=2 noet:

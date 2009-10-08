@@ -57,7 +57,7 @@ etc&#8230;
        Save pacman database in specified directory. If no directory is specified, aurman use the current directory.</literallayout>
 <literallayout class="monospaced">-B, --backup [file.tar.bz2]
        Restore  a  previous backup of the pacman database. Yaourt analyse the backup first and shows the differences
-       with the current alpm db. You have to type "yes" to replace the database by the old one. Actual  database  is
+       with the current alam db. You have to type "yes" to replace the database by the old one. Actual  database  is
        automatically saved in /tmp/ folder.</literallayout>
 <literallayout class="monospaced">-C, --clean
        Perform cleaning operations on the package cache, databases and  configuration files</literallayout>

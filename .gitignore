@@ -21,11 +21,19 @@ missing
 stamp-h1
 
 *.o
+*.lo
+*.Po
+*.Plo
+*.a
+*.la
+*.lai
+*.so*
 *~
 root
 tags
 cscope.out
 cscope.in.out
 cscope.po.out
-pacman-*.tar.gz
-./src/aurman/aurman
+aurman
+src/aurman/aurman
+aurmanrc

@@ -71,6 +71,7 @@ const char aur_submit_url[] = "http://aur.archlinux.org/pkgsubmit.php";
 const char aur_packages_dl_location[] = "http://aur.archlinux.org/packages/";
 
 char pkg_search[200] = "";
+char dl_pkg_location[200] = "";
 char user[200];
 char pass[200];
 char dl_location[PATH_MAX];
@@ -420,7 +421,7 @@ static size_t my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
   if(out && !out->stream) {
     /* open file for writing */
     /* out->stream=fopen(out->filename, "wb"); */
-    out->stream=fopen(dl_location, "wb");
+    out->stream=fopen(dl_pkg_location, "wb");
     if(!out->stream)
       return -1; /* failure, can't open file to write */
   }
@@ -488,8 +489,8 @@ int am_login(CURL *handle)
     curl_easy_setopt(handle, CURLOPT_COOKIEFILE, tmp_str);
     curl_easy_setopt(handle, CURLOPT_COOKIEJAR, tmp_str);
     memset(tmp_str,0,sizeof(tmp_str));
-	printf("USER: %s, PASS: %s\n", user, pass);
-    snprintf(tmp_str, sizeof(tmp_str), "user=%s&passwd=%s", user, pass);
+	printf("USER: %s, PASS: %s\n", config->user, config->pass);
+    snprintf(tmp_str, sizeof(tmp_str), "user=%s&passwd=%s", config->user, config->pass);
     curl_easy_setopt(handle, CURLOPT_POSTFIELDS, tmp_str);
     curl_easy_setopt(handle, CURLOPT_URL, aur_main_url);
     curl_easy_perform(handle);
@@ -984,7 +985,7 @@ static int _parseconfig(const char *file, const char *givensection, amdb_t * con
 			/* strsep modifies the 'line' string: 'key \0 ptr' */
 			key = line;
 			ptr = line;
-			strsep(&ptr, "=");
+			key = strsep(&ptr, "=");
 			strtrim(key);
 			strtrim(ptr);
 
@@ -1452,6 +1453,14 @@ int am_aur (int argc, char *argv[])
 	/* init config data */
 	config = config_new();
 
+	/* initialize library */
+	if(alam_initialize() == -1) {
+		am_printf(AM_LOG_ERROR, _("failed to initialize alpm library (%s)\n"),
+		        alam_strerrorlast());
+		cleanup(EXIT_FAILURE);
+	}
+
+
 	/* Priority of options:
 	 * 1. command line
 	 * 2. config file
@@ -1473,35 +1482,35 @@ int am_aur (int argc, char *argv[])
 		cleanup(ret);
 	}
 
-    memset(tmp_str, 0, sizeof(tmp_str));
-    snprintf(tmp_str, sizeof(tmp_str), "%s/.aurmanrc", getenv("HOME"));
-    if (!file_exists(tmp_str)) {
-        printf("To create a new account just go to:");
-        printf("%s", aur_account_url);
-        printf("You should create ~/.aurmanrc with inside:\n");
-        printf("user=YOUR_AUR_USERNAME\n");
-        printf("pass=YOUR_AUR_PASSWORD\n");
-        printf("download=YOUR_DOWNLOAD_LOCATION\n");
-        printf("to avoid manual input of these data.\n");
-        printf("Your AUR username: \n");
-        fgets(user, 200, stdin);
-        printf("Your AUR password: \n");
-        fgets(pass, 200, stdin);
-        printf("Your AUR location, to where to download the packages: \n");
-        fgets(pass, PATH_MAX, stdin);
-    } else { // We will implement a better parser here
-        aurman_conf_file = fopen(tmp_str, "r");
-        memset(tmp_str, 0, sizeof(tmp_str));
-        fgets(tmp_str, sizeof(tmp_str), aurman_conf_file);
-        strncpy(user, &tmp_str[strlen("user=")], sizeof(user));
-        memset(tmp_str, 0, sizeof(tmp_str));
-        fgets(tmp_str, sizeof(tmp_str), aurman_conf_file);
-        strncpy(pass, &tmp_str[strlen("pass=")], sizeof(pass));
-        memset(tmp_str, 0, sizeof(tmp_str));
-        fgets(tmp_str, sizeof(tmp_str), aurman_conf_file);
-        strncpy(dl_location, &tmp_str[strlen("download=")], sizeof(pass));
-        fclose(aurman_conf_file);
-    }
+    /* memset(tmp_str, 0, sizeof(tmp_str)); */
+    /* snprintf(tmp_str, sizeof(tmp_str), "%s/.aurmanrc", getenv("HOME")); */
+    /* if (!file_exists(tmp_str)) { */
+        /* printf("To create a new account just go to:"); */
+        /* printf("%s", aur_account_url); */
+        /* printf("You should create ~/.aurmanrc with inside:\n"); */
+        /* printf("user=YOUR_AUR_USERNAME\n"); */
+        /* printf("pass=YOUR_AUR_PASSWORD\n"); */
+        /* printf("download=YOUR_DOWNLOAD_LOCATION\n"); */
+        /* printf("to avoid manual input of these data.\n"); */
+        /* printf("Your AUR username: \n"); */
+        /* fgets(user, 200, stdin); */
+        /* printf("Your AUR password: \n"); */
+        /* fgets(pass, 200, stdin); */
+        /* printf("Your AUR location, to where to download the packages: \n"); */
+        /* fgets(pass, PATH_MAX, stdin); */
+    /* } else { // We will implement a better parser here */
+        /* aurman_conf_file = fopen(tmp_str, "r"); */
+        /* memset(tmp_str, 0, sizeof(tmp_str)); */
+        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
+        /* strncpy(user, &tmp_str[strlen("user=")], sizeof(user)); */
+        /* memset(tmp_str, 0, sizeof(tmp_str)); */
+        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
+        /* strncpy(pass, &tmp_str[strlen("pass=")], sizeof(pass)); */
+        /* memset(tmp_str, 0, sizeof(tmp_str)); */
+        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
+        /* strncpy(dl_location, &tmp_str[strlen("download=")], sizeof(pass)); */
+        /* fclose(aurman_conf_file); */
+    /* } */
 
     if (argv[1] != NULL) {
         snprintf(pkg_sample, sizeof(pkg_sample), "%s\",", pkg_name);
@@ -1534,6 +1543,8 @@ int am_aur (int argc, char *argv[])
             memset(pkg_archive, 0, sizeof(pkg_archive));
             snprintf(pkg_archive, sizeof(pkg_archive), "%s.tar.gz", pkg_name);
             httpfile.filename = strndup(pkg_archive, sizeof(pkg_archive));
+			memset(dl_pkg_location, 0, sizeof(dl_pkg_location));
+			snprintf(dl_pkg_location, sizeof(dl_pkg_location), "%s%s", config->dl_dir, pkg_archive);
             memset(tmp_str, 0, sizeof(tmp_str));
             snprintf(tmp_str, sizeof(tmp_str), "%s%s/%s.tar.gz", aur_packages_dl_location, pkg_name, pkg_name);
             curl_easy_setopt(handle, CURLOPT_URL, tmp_str);
@@ -1549,7 +1560,7 @@ int am_aur (int argc, char *argv[])
         }
         if(httpfile.stream)
             fclose(httpfile.stream); /* close the local file */
-        alam_unpack(pkg_archive, ".", NULL);
+        alam_unpack(dl_pkg_location,  config->dl_dir, NULL);
     }
 
     if (config->am_comment) {

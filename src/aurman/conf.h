@@ -41,6 +41,7 @@ typedef struct __config_t {
 	char *user;
 	char *pass;
 	char *dl_dir;
+	char *category;
 	/* TODO how to handle cachedirs? */
 
 	unsigned short op_q_isfile;

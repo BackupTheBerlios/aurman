@@ -52,32 +52,32 @@
 #include "md5.h"
 #include "handle.h"
 
-#ifndef HAVE_STRSEP
+/* #ifndef HAVE_STRSEP */
 /* This is a replacement for strsep which is not portable (missing on Solaris).
  * Copyright (c) 2001 by François Gouget <fgouget_at_codeweavers.com> */
-char* strsep(char** str, const char* delims)
-{
-	char* token;
+/* char* strsep(char** str, const char* delims) */
+/* { */
+	/* char* token; */
 
-	if (*str==NULL) {
-		/* No more tokens */
-		return NULL;
-	}
+	/* if (*str==NULL) { */
+		/* [> No more tokens <] */
+		/* return NULL; */
+	/* } */
 
-	token=*str;
-	while (**str!='\0') {
-		if (strchr(delims,**str)!=NULL) {
-			**str='\0';
-			(*str)++;
-			return token;
-		}
-		(*str)++;
-	}
-	/* There is no other token */
-	*str=NULL;
-	return token;
-}
-#endif
+	/* token=*str; */
+	/* while (**str!='\0') { */
+		/* if (strchr(delims,**str)!=NULL) { */
+			/* **str='\0'; */
+			/* (*str)++; */
+			/* return token; */
+		/* } */
+		/* (*str)++; */
+	/* } */
+	/* [> There is no other token <] */
+	/* *str=NULL; */
+	/* return token; */
+/* } */
+/* #endif */
 
 int _alam_makepath(const char *path)
 {
