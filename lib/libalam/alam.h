@@ -462,6 +462,8 @@ const char *alam_fileconflict_get_ctarget(amfileconflict_t *conflict);
 /* checksums */
 char *alam_compute_md5sum(const char *name);
 
+/* compress */
+int alam_pack(const char *archive, const char *prefix, const char *fn);
 /* uncompress */
 int alam_unpack(const char *archive, const char *prefix, const char *fn);
 

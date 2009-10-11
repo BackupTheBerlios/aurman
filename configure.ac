@@ -52,7 +52,7 @@ m4_define([aurman_version],
           [aurman_version_major.aurman_version_minor.aurman_version_micro])
 
 # Autoconf initialization
-AC_INIT([aurman], [aurman_version], [arch-general@archlinux.org])
+AC_INIT([aurman], [aurman_version], [aurman-dev@lists.berlios.de])
 AC_CONFIG_SRCDIR([config.h.in])
 AC_CONFIG_HEADERS([config.h])
 

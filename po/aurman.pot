@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: arch-general@archlinux.org\n"
+"Report-Msgid-Bugs-To: aurman-dev@lists.berlios.de\n"
 "POT-Creation-Date: 2009-09-27 19:15+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"

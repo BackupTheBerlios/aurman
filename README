@@ -1,7 +1,7 @@
-alam library overview & internals
+ALAM library overview & internals
 =================================
 
-Here is a list of the main objects and files from the alam (i.e. Arch Linux
+Here is a list of the main objects and files from the ALAM (i.e. Arch Linux
 Package Management) library. This document, while not exhaustive, also
 indicates some limitations (on purpose, or sometimes due to its poor design) of
 the library at the present time.
@@ -16,7 +16,7 @@ In addition to "alam.h", the interfaces of "alam_list.h" have also been made
 available to the frontend, for allowing it to manipulate the lists returned by
 the backend.
 
-Several structures and functions have been renamed compared to pacman 2.9 code.
+Several structures and functions have been renamed compared to aurman 0.1 code.
 This was done at first for the sake of naming scheme consistency, and then
 primarily because of potential namespace conflicts between library and frontend
 spaces. Indeed, it is not possible to have two different functions with the
@@ -53,9 +53,9 @@ library is initialized.
 * dlcb: The callback function for download progress of each package.
 * fetchcb: Callback for custom download function.
 * totaldlcb: The callback function for overall download progress.
-* root: The root directory for pacman to install to (Default: /)
-* dbpath: The toplevel database directory (Default: /var/lib/pacman)
-* logfile: The base path to pacman's log file (Default: /var/log/pacman.log)
+* root: The root directory for aurman to install to (Default: /)
+* dbpath: The toplevel database directory (Default: /var/lib/aurman)
+* logfile: The base path to aurman's log file (Default: /var/log/aurman.log)
 * usesyslog: Log to syslog instead of `logfile` for file-base logging.
 
 The following options also have `alam_option_{add,remove}_*` functions, as the
@@ -63,8 +63,8 @@ values are list structures.
 NOTE: The add and remove functions are NOT plural, as they are in English:
 alam_option_{get,set}_noupgrades -> alam_option_{add,remove}_noupgrade.
 
-* cachedirs: Paths to pacman's download caches (Default: /var/cache/pacman/pkg)
-* noupgrades: Files which will never be touched by pacman (extracted as .pacnew)
+* cachedirs: Paths to aurcman's download caches (Default: /var/cache/aurman/pkg)
+* noupgrades: Files which will never be touched by aurman (extracted as .pacnew)
 * noextracts: Files which will never be extracted at all (no .pacnew file)
 * ignorepkgs: Packages to ignore when upgrading.
 * ignoregrps: Groups to ignore when upgrading.
@@ -73,8 +73,8 @@ The following options are read-only, having ONLY alam_option_get_* functions:
 
 * lockfile: The file used for locking the database
   (Default: <dbpath>/db.lck)
-* localdb: A pmdb_t structure for the local (installed) database
-* syncdbs: A list of pmdb_t structures to which pacman can sync from.
+* localdb: A amdb_t structure for the local (installed) database
+* syncdbs: A list of amdb_t structures to which aurman can sync from.
 
 The following options are write-only, having ONLY alam_option_set_* functions:
 
@@ -141,17 +141,17 @@ functions will load the data from the DB as needed.
 
 [Errors]
 
-The library provides a global variable pm_errno.
+The library provides a global variable am_errno.
 It aims at being to the library what errno is for C system calls.
 
 Almost all public library functions are returning an integer value: 0
 indicating success, -1 indicating a failure.
-If -1 is returned, the variable pm_errno is set to a meaningful value
+If -1 is returned, the variable am_errno is set to a meaningful value
 Wise frontends should always care for these returned values.
 
 Note: the helper function alam_strerror() can also be used to translate one
 specified error code into a more friendly sentence, and alam_strerrorlast()
-does the same for the last error encountered (represented by pm_errno).
+does the same for the last error encountered (represented by am_errno).
 
 
 [List - alam_list_t]
@@ -172,19 +172,36 @@ dummy operations.
 
 High level features are left to the frontend ;)
 
-Please see the pacman documentation and the -h, --help option to get
-information.
+For instance, during a sysupgrade, the library returns the whole list of
+packages to be upgraded, without any care for its content.
+The frontend can inspect the list and perhaps notice that "aurman"
+itself has to be upgraded. In such a case, the frontend can choose to
+perform a special action.
+
 
 [MAIN] (see aurman.c)
 
+Calls for alam_initialize(), and alam_release().
 Read the configuration file, and parse command line arguments.
 Based on the action requested, it initiates the appropriate transactions
-(see pacman_upgrade(), pacman_remove(), pacman_sync() in files upgrade.c,
+(see aurman_upgrade(), aurman_remove(), aurman_sync() in files upgrade.c,
 remove.c and sync.c).
 
 
 [CONFIGURATION] (see conf.h)
 
-The frontend is using a configuration file, usually "~/.aurmanrc".
+The frontend is using a configuration file, usually "/etc/aurman.conf".  Some
+of these options are only useful for the frontend only (mainly the ones used to
+control the output like showsize or totaldownload, or the behavior with
+cleanmethod and syncfirst).  The rest is used to configure the library.
+
+
+[UPGRADE/REMOVE/SYNC]
+
+The file aurman.c has been divided into several smaller files, namely
+upgrade.c, remove.c, sync.c and query.c, to hold the big parts: aurman_upgrade,
+aurman_remove, aurman_sync.
+
+These 3 functions have been split to ease the code reading.
 
 

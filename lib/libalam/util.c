@@ -239,7 +239,91 @@ int _alam_lckrm()
 }
 
 //------------------------------------------------------------------
-/* Compression functions */
+struct alam_pack_data {
+        const char *name;
+        int fd;
+};
+
+//------------------------------------------------------------------
+int alam_pack_open(struct archive *a, void *client_data)
+{
+  struct alam_pack_data *alam_pack_data = client_data;
+  alam_pack_data->fd = open(alam_pack_data->name, O_WRONLY | O_CREAT, 0644);
+  if (alam_pack_data->fd >= 0)
+    return (ARCHIVE_OK);
+  else {
+    return (ARCHIVE_FATAL);
+  }
+}
+
+//------------------------------------------------------------------
+ssize_t alam_pack_write(struct archive *a, void *client_data, const void *buff, size_t n)
+{
+  struct alam_pack_data *alam_pack_data = client_data;
+  return (write(alam_pack_data->fd, buff, n));
+}
+
+//------------------------------------------------------------------
+int alam_pack_close(struct archive *a, void *client_data)
+{
+  struct alam_pack_data *alam_pack_data = client_data;
+  if (alam_pack_data->fd > 0)
+    close(alam_pack_data->fd);
+  return (0);
+}
+
+//------------------------------------------------------------------
+/* Compression function */
+/**
+ * @brief pack specific files or all files into an archive.
+ *
+ * @param archive  		the archive filename to create
+ * @param prefix   		where to create the archive
+ * @param fn			 		the files to pack into the archive or NULL for all
+ * @param compress_t 	The resulting archive will be compressed as specified(gzip,
+ * bzip2, etc).
+ * @param format_t 		The resulting archive will be formatted as specified(ustar,
+ * pax, etc).
+ * @return 0 on success, 1 on failure
+ */
+/* int SYMEXPORT alam_pack(const char *archive, const char *prefix, const char **fn, int compress_t, int format_t) */
+int SYMEXPORT alam_pack(const char *archive, const char *prefix, const char **fn)
+{
+  struct alam_pack_data *alam_pack_data = malloc(sizeof(struct alam_pack_data));
+  struct archive *_archive;
+  struct archive_entry *entry;
+  struct stat st;
+  char buff[8192];
+  int len;
+  int fd;
+
+	_archive = archive_write_new();
+	alam_pack_data->name = archive;
+	archive_write_set_compression_gzip(_archive);
+	archive_write_set_format_ustar(_archive);
+	archive_write_open(_archive, alam_pack_data, alam_pack_open, alam_pack_write, alam_pack_close);
+	while (*filename) {
+		stat(*filename, &st);
+		entry = archive_entry_new();
+		archive_entry_copy_stat(entry, &st);
+		archive_entry_set_pathname(entry, *filename);
+		archive_entry_set_size(entry, st.st_size);
+		archive_clear_error(_archive);
+		archive_write_header(_archive, entry);
+		fd = open(*filename, O_RDONLY);
+		len = read(fd, buff, sizeof(buff));
+		while ( len > 0 ) {
+			archive_write_data(_archive, buff, len);
+			len = read(fd, buff, sizeof(buff));
+		}
+		archive_entry_free(entry);
+		filename++;
+	}
+	archive_write_finish(_archive);
+}
+
+//------------------------------------------------------------------
+/* Uncompression function */
 /**
  * @brief Unpack a specific file or all files in an archive.
  *

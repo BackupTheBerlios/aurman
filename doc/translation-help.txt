@@ -1,8 +1,8 @@
-Pacman - Translating
+Aurman - Translating
 ====================
 
 This document is here to guide you in helping translate aurman messages,
-and the manpages for the entire aurman package.
+libalam messages, and the manpages for the entire aurman package.
 
 A quick note- the gettext website is a very useful guide to read before
 embarking on translation work, as it describes many of the commands in more
@@ -19,8 +19,9 @@ Translating Messages
 Overview
 ~~~~~~~~
 
-There are one message catalogs in aurman- for the frontend (aurman and scripts).
-These correspond to `po` directories in the aurman source, respectively.
+There are two separate message catalogs in aurman- one for the backend
+(libalam) and one for the frontend (aurman and scripts). These correspond to
+the `lib/libalam/po` and `po` directories in the aurman source, respectively.
 
 Translation message files are a specially formatted text file containing the
 original message and the corresponding translation. These po files can then
@@ -34,7 +35,7 @@ Pre-release Updates
 
 A week or two before each release, the codebase will go into a string freeze
 and an email will be sent by the 'translation lieutenant' to the
-mailto:arch-general@archlinux.org[arch-general] mailing list asking for
+mailto: aurman-dev@lists.berlios.de[aurman-dev] mailing list asking for
 translations. This email will have a prefix of *[translation]* for anyone
 looking to set up an email filter.
 
@@ -63,17 +64,19 @@ Incremental Updates
 If you have more advanced needs you will have to get a copy of the aurman
 repository.
 
-    git clone git://developer.berlios.de/aurman.git aurman
+    git clone git://git.berlios.de/aurman
 
 Next, you will need to run `./autogen.sh` and `./configure` in the base
 directory to generate the correct Makefiles. At this point, all necessary
 make targets will be generated and we can begin updating the translation
 files.
 
-We need to first update the main message catalog file. Navigate into the `po`
-directory and execute the following command:
+We need to first update the main message catalog file. Navigate into either the
+`lib/libalam/po` or `po` directory depending on which translation you wish to
+work on first, and execute the following command.  If you are working in the
+`po/` tree, replace 'libalam.pot' with 'aurman.pot':
 
-    make aurman.pot-update
+    make libalam.pot-update
 
 Next, update your specific language's translation file:
 
@@ -92,9 +95,11 @@ Adding a New Language
 ~~~~~~~~~~~~~~~~~~~~~
 
 Making a new language is not too hard, but be sure to follow all the steps.
-You will have to do the following steps in the `po/` directories, substituting
-where appropriate. First, edit the `LINGUAS` file and add your new language
-code at the bottom. Next, run the following command, substituting 'aurman.pot':
+You will have to do the following steps in both the `lib/libalam/po/` and `po/`
+directories, substituting where appropriate. First, edit the `LINGUAS` file and
+add your new language code at the bottom. Next, run the following command,
+substituting 'libalam.pot' or 'aurman.pot' for potfile depending on which
+directory you are currently working in:
 
 	msginit -l <lang code> -o <lang code>.po -i <potfile>
 
@@ -122,7 +127,7 @@ If you want to test the translation (for example, the frontend one):
 
     rm *.gmo stamp-po
     make
-    cp <lang code>.gmo /usr/share/locale/<lang code>/LC_MESSAGES/pacman.mo
+    cp <lang code>.gmo /usr/share/locale/<lang code>/LC_MESSAGES/aurman.mo
 
 
 Translating Manpages
@@ -131,8 +136,8 @@ Translating Manpages
 There are currently no efforts underway to include translated manpages in the
 aurman codebase. However, this is not to say translations are unwelcome. If
 someone has experience with i18n manpages and how to best include them with our
-source, please contact arch-general mailing list at
-mailto:arch-general@archlinux.org[].
+source, please contact the aurman-dev mailing list at
+mailto:aurman-dev@@lists.berlios.de[aurman-dev].
 
 Some community efforts have been made to translate manpages, and these can be
 found in the link:http://aur.archlinux.org[AUR] (Arch User Repository). Please

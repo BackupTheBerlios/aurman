@@ -118,8 +118,8 @@ Utilities available:
 
 Bugs
 ----
-If you find bugs (which is quite likely), please email them to the arch-general
-mailing last at mailto:arch-general@archlinux.org[] with specific information
+If you find bugs (which is quite likely), please email them to the aurman-dev
+mailing last at mailto:aurman-dev@lists.berlios.de[] with specific information
 such as your commandline, the nature of the bug, and even the package database
 if it helps.
 
