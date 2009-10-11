@@ -337,7 +337,7 @@ ${PACKAGE_NAME}:
     source code location   : ${srcdir}
     prefix                 : ${prefix}
     sysconfdir             : $(eval echo ${sysconfdir})
-       conf file           : $(eval echo ${sysconfdir})/aurmanrc
+       conf file           : $(eval echo ${sysconfdir})/aurman.conf
     localstatedir          : $(eval echo ${localstatedir})
        database dir        : $(eval echo ${localstatedir})/lib/aurman/
        cache dir           : $(eval echo ${localstatedir})/cache/aurman/pkg/

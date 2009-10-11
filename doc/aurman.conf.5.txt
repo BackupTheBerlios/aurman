@@ -1,16 +1,16 @@
 /////
 vim:set ts=4 sw=4 syntax=asciidoc noet:
 /////
-aurmanrc(5)
+aurman.conf(5)
 ============
 
 Name
 ----
-aurmanrc - aurman package manager configuration file
+aurman.conf - aurman package manager configuration file
 
 Synopsis
 --------
-/home/user/.aurmanrc
+/home/user/.aurman.conf
 
 
 Description
@@ -19,7 +19,7 @@ Description
 
            1.   command-line options
 
-           2.   user's configuration file (~/.aurmanrc)
+           2.   user's configuration file (~/.aurman.conf)
 
 
        user
@@ -52,6 +52,6 @@ MANPAGE AUTHORS
 
 
 
-                                                     September 27, 2009                                         aurmanrc(5)
+                                                     September 27, 2009                                         aurman.conf(5)
 
 

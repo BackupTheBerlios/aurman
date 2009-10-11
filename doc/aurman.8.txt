@@ -249,7 +249,7 @@ CONFIGURATION
 
 
 SEE ALSO
-       aurmanrc(5), pacman(8), makepkg(8)
+       aurman.conf(5), pacman(8), makepkg(8)
 
        See the berlios developer website at <http://developer.berlios.de/projects/> for more current information about aur‐
        man.

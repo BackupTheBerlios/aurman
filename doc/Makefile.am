@@ -5,13 +5,13 @@
 
 ASCIIDOC_MANS = \
 	aurman.8 \
-	aurmanrc.5
+	aurman.conf.5
 
 DOXYGEN_MANS = $(wildcard man3/*.3)
 
 HTML_MANPAGES = \
 	aurman.8.html \
-	aurmanrc.5.html
+	aurman.conf.5.html
 
 HTML_OTHER = \
 	index.html \
@@ -25,7 +25,7 @@ HTML_DOCS = \
 EXTRA_DIST = \
 	asciidoc.conf \
 	aurman.8.txt \
-	aurmanrc.5.txt \
+	aurman.conf.5.txt \
 	footer.txt \
 	index.txt \
 	submitting-patches.txt \
@@ -92,7 +92,7 @@ $(HTML_OTHER): asciidoc.conf
 
 # Dependency rules
 aurman.8 aurman.8.html: aurman.8.txt
-aurmanrc.5 aurmanrc.5.html: aurmanrc.5.txt
+aurman.conf.5 aurman.conf.5.html: aurman.conf.5.txt
 # this one is just a symlink
 
 # vim:set ts=2 sw=2 noet:

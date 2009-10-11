@@ -35,4 +35,4 @@ cscope.in.out
 cscope.po.out
 aurman
 src/aurman/aurman
-aurmanrc
+aurman.conf

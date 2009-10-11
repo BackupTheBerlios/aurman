@@ -191,7 +191,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 
 # paths set at make time
-conffile = ${sysconfdir}/aurmanrc
+conffile = ${sysconfdir}/aurman.conf
 dbpath = ${localstatedir}/lib/pacman/
 cachedir = ${localstatedir}/cache/pacman/pkg/
 INCLUDES = -I$(top_srcdir)/lib/libalam

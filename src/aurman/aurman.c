@@ -1594,11 +1594,11 @@ int am_aur (int argc, char *argv[])
 	}
 
     /* memset(tmp_str, 0, sizeof(tmp_str)); */
-    /* snprintf(tmp_str, sizeof(tmp_str), "%s/.aurmanrc", getenv("HOME")); */
+    /* snprintf(tmp_str, sizeof(tmp_str), "%s/.aurman.conf", getenv("HOME")); */
     /* if (!file_exists(tmp_str)) { */
         /* printf("To create a new account just go to:"); */
         /* printf("%s", aur_account_url); */
-        /* printf("You should create ~/.aurmanrc with inside:\n"); */
+        /* printf("You should create ~/.aurman.conf with inside:\n"); */
         /* printf("user=YOUR_AUR_USERNAME\n"); */
         /* printf("pass=YOUR_AUR_PASSWORD\n"); */
         /* printf("download=YOUR_DOWNLOAD_LOCATION\n"); */

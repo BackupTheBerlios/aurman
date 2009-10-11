@@ -36,7 +36,7 @@ configuration files dealing with pacman.
 * linkman:pacman.conf[5]
 * linkman:repo-add[8]
 * linkman:aurman[8]
-* linkman:aurmanrc[5]
+* linkman:aurman.conf[5]
 
 Changelog
 ~~~~~~~~~

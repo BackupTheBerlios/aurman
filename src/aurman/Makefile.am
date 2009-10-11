@@ -1,5 +1,5 @@
 # paths set at make time
-conffile  = ${sysconfdir}/aurmanrc
+conffile  = ${sysconfdir}/aurman.conf
 dbpath    = ${localstatedir}/lib/aurman/
 cachedir  = ${localstatedir}/cache/aurman/pkg/
 logfile   = ${localstatedir}/log/aurman.log

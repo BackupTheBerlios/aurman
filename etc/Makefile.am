@@ -1,5 +1,5 @@
-dist_sysconf_DATA = aurmanrc
-EXTRA_DIST = aurmanrc.in
+dist_sysconf_DATA = aurman.conf
+EXTRA_DIST = aurman.conf.in
 
 # Files that should be removed, but which Automake does not know.
 MOSTLYCLEANFILES = $(dist_sysconf_DATA)
@@ -25,6 +25,6 @@ $(dist_sysconf_DATA): Makefile
 	@$(edit) `test -f ./$@.in || echo $(srcdir)/`$@.in >$@.tmp
 	@mv $@.tmp $@
 
-makepkg.conf: $(srcdir)/aurmanrc.in
+makepkg.conf: $(srcdir)/aurman.conf.in
 
 # vim:set ts=2 sw=2 noet:
