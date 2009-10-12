@@ -22,6 +22,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifdef __linux__
+#define	_FILE_OFFSET_BITS 64
+#endif
+
+#include <sys/stat.h>
 #include "config.h"
 
 #include <stdio.h>
@@ -36,7 +41,6 @@
 #include <syslog.h>
 #include <errno.h>
 #include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/wait.h>
 
 /* libarchive */
@@ -307,7 +311,6 @@ int SYMEXPORT alam_pack(const char *archive, const char *prefix, const char **fn
 		entry = archive_entry_new();
 		archive_entry_copy_stat(entry, &st);
 		archive_entry_set_pathname(entry, *filename);
-		archive_entry_set_size(entry, st.st_size);
 		archive_clear_error(_archive);
 		archive_write_header(_archive, entry);
 		fd = open(*filename, O_RDONLY);
