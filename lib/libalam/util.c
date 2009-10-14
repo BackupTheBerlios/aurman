@@ -306,21 +306,21 @@ int SYMEXPORT alam_pack(const char *archive, const char *prefix, const char **fn
 	archive_write_set_compression_gzip(_archive);
 	archive_write_set_format_ustar(_archive);
 	archive_write_open(_archive, alam_pack_data, alam_pack_open, alam_pack_write, alam_pack_close);
-	while (*filename) {
-		stat(*filename, &st);
+	while (*fn) {
+		stat(*fn, &st);
 		entry = archive_entry_new();
 		archive_entry_copy_stat(entry, &st);
-		archive_entry_set_pathname(entry, *filename);
+		archive_entry_set_pathname(entry, *fn);
 		archive_clear_error(_archive);
 		archive_write_header(_archive, entry);
-		fd = open(*filename, O_RDONLY);
+		fd = open(*fn, O_RDONLY);
 		len = read(fd, buff, sizeof(buff));
 		while ( len > 0 ) {
 			archive_write_data(_archive, buff, len);
 			len = read(fd, buff, sizeof(buff));
 		}
 		archive_entry_free(entry);
-		filename++;
+		fn++;
 	}
 	archive_write_finish(_archive);
 }

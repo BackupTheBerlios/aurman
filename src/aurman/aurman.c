@@ -342,9 +342,11 @@ static void _am_pip_foreach(char *src, char **out_tail, pkg_info_handler_t handl
  */
 static char *_am_strvcat(int count, char **strv)
 {
-	char *s, *str;
-	size_t n, len = 0;
-	int i;
+	char *s = NULL;
+	char *str = NULL;
+	size_t n = 0;
+	size_t len = 0;
+	int i = 0;
 
 	for (i = 0; i < count; ++i) {
 		len += strlen(strv[i]);
@@ -1281,8 +1283,7 @@ static int parseargs(int argc, char *argv[])
 		{"needed",     			no_argument,       0, AM_LONG_OP_NEEDED},
 		{"asexplicit",     		no_argument,   0, AM_LONG_OP_ASEXPLICIT},
 		{"arch",       			required_argument, 0, AM_LONG_OP_ARCH},
-		{"source",  			no_argument, 		0, AM_LONG_OP_SOURCE},
-
+		/* {"source",  			no_argument, 		0, AM_LONG_OP_SOURCE}, */
 		{0, 0, 0, 0}
 	};
 
@@ -1420,120 +1421,25 @@ static int parseargs(int argc, char *argv[])
                 config->am_comment = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
-            case AM_LONG_OP_SOURCE:
-				config->source = 1;
-				break;
-
-
-
-# if we are creating a source-only package, go no further
-	if (config->createpkg) {
-	if(file_exist("$PKGDEST/${pkgbase}-${pkgver}-${pkgrel}${SRCEXT}") && !force) {
-		printf(_("A package has already been built. (use -f to overwrite)"));
-		return -1;
-	}
-	create_srcpackage();
-	printf(_("Source package created: %s"),  "$pkgbase ($(date))"
-	return 0;
-	}
-
-int create_srcpackage() {
-
-	char *srclinks = NULL;
-	struct stat st;
-	struct stat st2;
-	char	tmp_str[200] = "";
-	char	tmp_str2[200] = "";
-	char 	*netfile = NULL;
-	char	*TAR_OPT = NULL;
-
-	printf(_("Creating source package..."));
-	memset(tmp_str, 0, sizeof(tmp_str));
-	snprintf(tmp_str, sizeof(tmp_str), "%s/srclinks.XXXXXXXXX", srcdir);
-	srclinks = mkostemp(tmp_str, O_CREATE | O_DIRECTORY);
-
-	memset(tmp_str, 0, sizeof(tmp_str));
-	snprintf(tmp_str, sizeof(tmp_str), "srclinks/%s", pkgbase);
-	mkdir(tmp_str, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-	printf(_("Adding %s..."), buildscript);
-	memset(tmp_str, 0, sizeof(tmp_str));
-	snprintf(tmp_str, sizeof(tmp_str), "%s/%s/%s", srclinks, pkgbase, buildscript);
-	symlink(buildfile, tmp_str);
-
-	if(install) {
-		stat(install, &st);
-		if(S_ISREG(st.st_mode) {
-			printf(_("Adding install script..."));
-			memset(tmp_str, 0, sizeof(tmp_str));
-			snprintf(tmp_str, sizeof(tmp_str), "%s/%s", startdir, install);
-			memset(tmp_str2, 0, sizeof(tmp_str2));
-			snprintf(tmp_str2, sizeof(tmp_str2), "%s/%s", srclinks, pkgbase);
-			symlink(tmp_str, tmp_str2);
-		} else {
-			printf(_("Install script %s not found."), install);
-			}
-	}
-
-
-	stat("ChangeLog", &st2);
-	if(S_ISREG(st2.st_mode) {
-		printf(_("Adding %s..."),  "ChangeLog");
-		memset(tmp_str, 0, sizeof(tmp_str));
-		snprintf(tmp_str, sizeof(tmp_str), "%s/%s", startdir, "ChangeLog");
-		memset(tmp_str2, 0, sizeof(tmp_str2));
-		snprintf(tmp_str2, sizeof(tmp_str2), "%s/%s", srclinks, pkgbase);
-		symlink(tmp_str, tmp_str2);
-		}
-
-	for netfile in "${source[@]}"; do
-		local file=$(get_filename "$netfile")
-		if [ -f "$netfile" ]; then
-			msg2 "$(gettext "Adding %s...")" "$netfile"
-			ln -s "${startdir}/$netfile" "${srclinks}/${pkgbase}"
-		elif [ "$SOURCEONLY" -eq 2 -a -f "$SRCDEST/$file" ]; then
-			msg2 "$(gettext "Adding %s...")" "$file"
-			ln -s "$SRCDEST/$file" "${srclinks}/${pkgbase}/"
-		fi
-	done
-
-	case "$SRCEXT" in
-		*tar.gz)  TAR_OPT="z" ;;
-		*tar.bz2) TAR_OPT="j" ;;
-		*tar.xz)  TAR_OPT="J" ;;
-		*) warning "$(gettext "'%s' is not a valid archive extension.")" \
-		"$SRCEXT" ;;
-	esac
-
-	local pkg_file="$PKGDEST/${pkgbase}-${pkgver}-${pkgrel}${SRCEXT}"
-
-	// tar it up
-	printf(_("Compressing source package..."));
-	chdir(srclinks);
-	if ! bsdtar -c${TAR_OPT}Lf "$pkg_file" ${pkgbase}; then
-		error "$(gettext "Failed to create source package file.")"
-		exit 1 # TODO: error code
-	fi
-	cd "${startdir}"
-	rm -rf "${srclinks}"
-}
-
-                break;
-            case 'h':
+            /* case AM_LONG_OP_SOURCE: */
+				/* config->source = 1; */
+				/* break; */
+			case 'h':
 				usage(mbasename(argv[0]));
-                break;
-            case 'V':
-                version();
-                break;
-            case AM_LONG_OP_LISTCAT:
-                list_cat();
-                break;
-            case '?':
+				break;
+			case 'V':
+				version();
+				break;
+			case AM_LONG_OP_LISTCAT:
+				list_cat();
+				break;
+			case '?':
 				return(1);
-            default:
+			default:
 				return(1);
-        }
-    }
+		}
+	}
+
 
 	while(optind < argc) {
 		/* add the target to our target array */
@@ -1680,9 +1586,9 @@ int am_aur (int argc, char *argv[])
         am_comment(handle);
     }
 
-    if (config->source) {
-        am_pack(handle);
-    }
+    /* if (config->source) { */
+        /* am_pack(handle); */
+    /* } */
 
     curl_easy_cleanup(handle);
     curl_global_cleanup();
