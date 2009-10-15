@@ -36,6 +36,11 @@ extern "C" {
  */
 
 /*
+ * Constants
+ */
+#define AM_USERNAME_MAX 32
+	
+/*
  * Structures
  */
 

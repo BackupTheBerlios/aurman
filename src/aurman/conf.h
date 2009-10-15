@@ -44,6 +44,8 @@ typedef struct __config_t {
 	char *category;
 	/* TODO how to handle cachedirs? */
 
+	char *maintainer;
+
 	unsigned short op_q_isfile;
 	unsigned short op_q_info;
 	unsigned short op_q_list;
@@ -135,7 +137,8 @@ enum {
 	AM_LONG_OP_NEEDED,
 	AM_LONG_OP_ASEXPLICIT,
 	AM_LONG_OP_ARCH,
-	AM_LONG_OP_SOURCE
+//  AM_LONG_OP_SOURCE,
+	AM_LONG_OP_MSEARCH
 };
 
 /* clean method */

@@ -558,6 +558,83 @@ size_t get_pkg_id(void *ptr, size_t size, size_t nmemb, void *stream)
     return size*nmemb;
 }
 
+// Variables used to pass data from am_curl_write_callback function to
+// get_pkg_data function
+static char *_data = NULL;
+static size_t old_len = 0;
+
+/**
+ * @brief      cURL write callback function used by get_pkg_data
+ *
+ * @param      ptr             raw data to save
+ * @param      size    size of character
+ * @param      nmemb   number of characters
+ * @param      stream
+ * @return     number of bytes actually taken care of - other than passed = error
+ */
+size_t am_write_callback_json(void *ptr, size_t size, size_t nmemb, void *stream)
+{
+	size_t cur_len = size * nmemb;
+	size_t new_len = old_len + cur_len;
+
+	_data = (char *)realloc(_data, new_len);
+	memcpy(_data + old_len, ptr, cur_len);
+	old_len = new_len;
+
+	return cur_len; // no error
+}
+
+/**
+ * @brief      Get pkg data	from AUR using selected method
+ *
+ * @param      type    method to call
+ * @param      arg     argument to method
+ * @param      data    retrieved characters, must be freed afterwards
+ * @param      size    number of retrieved characters
+ * @return     0 success, others error
+ *
+ * See http://aur.archlinux.org/rpc.php and http://aur.louipc.mine.nu/rpc.php.
+ */
+int get_pkg_data(
+		char const *type,
+		char const *arg,
+		char **data,
+		size_t *size)
+{
+	int ret = 0;
+	char const *base_url = "http://aur.louipc.mine.nu/rpc.php";
+	int len = 0;
+	char *url = NULL;
+
+	// url + '\0'
+	len = snprintf(NULL, 0, "%s?type=%s&arg=%s", base_url, type, arg) + 1;
+	if (!(url = calloc(len, sizeof(char)))) {
+		ret = AM_ERR_MEMORY;
+		goto exit;
+	}
+	snprintf(url, len, "%s?type=%s&arg=%s", base_url, type, arg);
+
+	curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, am_write_callback_json);
+	curl_easy_setopt(handle, CURLOPT_URL, url);
+	curl_easy_perform(handle);
+
+	// nasty way to add trailing \0
+	_data = (char *)realloc(_data, old_len + 1);
+	_data[old_len] = '\0';
+	*data = _data;
+	*size = old_len;
+	
+	// reset helper variables if another call should occur
+	_data = NULL;
+	old_len = 0;
+
+exit:
+	if (url != NULL) {
+		free(url);
+	}
+	return ret;
+}
+             
 //------------------------------------------------------------------------------
 /*
  * @brief submits a package to aur
@@ -693,6 +770,7 @@ static void usage(const char * const myname)
     printf("      --category          Set the category for submitting\n");
     printf("      --download          Downlaod %s from AUR\n", str_pkg);
     printf("      --comment           Take a comment/feedback for %s\n", str_pkg);
+    printf("      --msearch           List %s maintained by <user>\n", str_pkg);
 }
 
 //------------------------------------------------------------------
@@ -1284,6 +1362,7 @@ static int parseargs(int argc, char *argv[])
 		{"asexplicit",     		no_argument,   0, AM_LONG_OP_ASEXPLICIT},
 		{"arch",       			required_argument, 0, AM_LONG_OP_ARCH},
 		/* {"source",  			no_argument, 		0, AM_LONG_OP_SOURCE}, */
+		{"msearch",          	required_argument, 0, AM_LONG_OP_MSEARCH},
 		{0, 0, 0, 0}
 	};
 
@@ -1433,6 +1512,9 @@ static int parseargs(int argc, char *argv[])
 			case AM_LONG_OP_LISTCAT:
 				list_cat();
 				break;
+			case AM_LONG_OP_MSEARCH:
+				config->maintainer = strndup(optarg, AM_USERNAME_MAX);
+				break;
 			case '?':
 				return(1);
 			default:
@@ -1448,6 +1530,41 @@ static int parseargs(int argc, char *argv[])
 	}
 
     return(1);
+}
+
+/**
+ * @brief Execute `--msearch' command.
+ *
+ * @param maintainer AUR username of maintainer whose packages are to be listed 
+ * @return 0 success, others error
+ *
+ * Query AUR for packages maintained by given user and output them to stdout.
+ */
+int am_msearch(char *maintainer)
+{
+	int ret = 0;
+	void *data = NULL;
+	size_t size;
+	pkg_info_t info;
+
+	ret = get_pkg_data("msearch", maintainer, &data, &size);
+	if (ret == 0 ) {
+		_am_pip_get_type(data, &data);
+		_am_pkg_info_init(&info);
+		while (_am_pip_info(data, &data, &info)) {
+			printf("aur/%s %s\n\t%s\n", info.name, info.version, info.description);
+		}
+	}// else {
+		//am_printf(AM_LOG_ERROR, "Failed to get package data.\n");
+		//ret = -1;
+		//goto exit;
+	//}
+
+//exit:
+	if (data != NULL) {
+		free(data);
+	}
+	return ret;
 }
 
 //------------------------------------------------------------------
@@ -1590,10 +1707,19 @@ int am_aur (int argc, char *argv[])
         /* am_pack(handle); */
     /* } */
 
+	if (config->maintainer != NULL) {
+		ret = am_msearch(config->maintainer);
+		if (ret != 0) {
+			am_printf(AM_LOG_ERROR, "%s\n", alam_strerror(ret));
+		}
+	}
+
     curl_easy_cleanup(handle);
     curl_global_cleanup();
     free(pkg_name);
     /* _am_handle_free(handle); */
+
+	config_free(config);
 
     return 0;
 }

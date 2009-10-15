@@ -59,6 +59,7 @@ int config_free(config_t *oldconfig)
 
 	FREELIST(oldconfig->holdpkg);
 	FREELIST(oldconfig->syncfirst);
+	free(oldconfig->maintainer);
 	free(oldconfig->configfile);
 	free(oldconfig->rootdir);
 	free(oldconfig->dbpath);
