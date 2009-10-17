@@ -623,7 +623,7 @@ int get_pkg_data(
 	_data[old_len] = '\0';
 	*data = _data;
 	*size = old_len;
-	
+
 	// reset helper variables if another call should occur
 	_data = NULL;
 	old_len = 0;
@@ -634,7 +634,7 @@ exit:
 	}
 	return ret;
 }
-             
+
 //------------------------------------------------------------------------------
 /*
  * @brief submits a package to aur
@@ -827,31 +827,31 @@ int am_pkg_action(CURL *handle, int am_pkg_action_t) {
 
     memset(tmp_str, 0, sizeof(tmp_str));
     switch(am_pkg_action_t) {
-        case AM_LONG_OP_VOTE:
+        case OP_VOTE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Vote=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_UNVOTE:
+        case OP_UNVOTE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnVote=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_FLAG:
+        case OP_FLAG:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Flag=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_UNFLAG:
+        case OP_UNFLAG:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnFlag=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_NOTIFY:
+        case OP_NOTIFY:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Notify=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_UNNOTIFY:
+        case OP_UNNOTIFY:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_UnNotify=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_ADOPT:
+        case OP_ADOPT:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Adopt=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_DISOWN:
+        case OP_DISOWN:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Disown=1", pkg_id, pkg_id);
             break;
-        case AM_LONG_OP_DELETE:
+        case OP_DELETE:
             snprintf(tmp_str, sizeof(tmp_str), "IDs[%s]=1&ID=%s&do_Delete=1", pkg_id, pkg_id);
             break;
         default:
@@ -1325,69 +1325,69 @@ static int parseargs(int argc, char *argv[])
 	{
 		{"help",                no_argument,       0, 'h'},
 		{"version",             no_argument,       0, 'V'},
-		{"pacman",              no_argument,       0,  AM_LONG_OP_PACMAN},
-		{"makepkg",             required_argument, 0,  AM_LONG_OP_MAKEPKG},
-		{"aurman",              required_argument, 0,  AM_LONG_OP_AURMAN},
-		{"vote",                required_argument, 0,  AM_LONG_OP_VOTE},
-		{"unvote",              required_argument, 0,  AM_LONG_OP_UNVOTE},
-		{"notify",              required_argument, 0,  AM_LONG_OP_NOTIFY},
-		{"unnotify",            required_argument, 0,  AM_LONG_OP_UNNOTIFY},
-		{"flag",                required_argument, 0,  AM_LONG_OP_FLAG},
-		{"unflag",              required_argument, 0,  AM_LONG_OP_UNFLAG},
-		{"adopt",               required_argument, 0,  AM_LONG_OP_ADOPT},
-		{"disown",              required_argument, 0,  AM_LONG_OP_DISOWN},
-		{"check",               required_argument, 0,  AM_LONG_OP_CHECK},
-		{"checkoutofdate",      required_argument, 0,  AM_LONG_OP_CHECKOUTOFDATE},
-		{"user",                required_argument, 0,  AM_LONG_OP_USER},
-		{"pass",                required_argument, 0,  AM_LONG_OP_PASS},
-		{"delete",              required_argument, 0,  AM_LONG_OP_DELETE},
-		{"mypackages",          required_argument, 0,  AM_LONG_OP_MYPACKAGES},
-		{"listcat",             no_argument,       0,  AM_LONG_OP_LISTCAT},
-		{"pkgsubmit",           required_argument, 0,  AM_LONG_OP_PKGSUBMIT},
-		{"category",            required_argument, 0,  AM_LONG_OP_CATEGORY},
-		{"download",            required_argument, 0,  AM_LONG_OP_DOWNLOAD},
-		{"comment",             required_argument, 0,  AM_LONG_OP_COMMENT},
-		{"noconfirm",  			no_argument,       0, AM_LONG_OP_NOCONFIRM},
-		{"config",     			required_argument, 0, AM_LONG_OP_CONFIG},
-		{"ignore",     			required_argument, 0, AM_LONG_OP_IGNORE},
-		{"debug",      			optional_argument, 0, AM_LONG_OP_DEBUG},
-		{"noprogressbar", 		no_argument,    	0, AM_LONG_OP_NOPROGRESSBAR},
-		{"noscriptlet", 		no_argument,      	0, AM_LONG_OP_NOSCRIPTLET},
-		{"ask",        			required_argument, 0, AM_LONG_OP_ASK},
-		{"cachedir",   			required_argument, 0, AM_LONG_OP_CACHEDIR},
-		{"asdeps",     			no_argument,       0, AM_LONG_OP_ASDEPS},
-		{"logfile",    			required_argument, 0, AM_LONG_OP_LOGFILE},
-		{"ignoregroup", 		required_argument, 0, AM_LONG_OP_IGNOREGROUP},
-		{"needed",     			no_argument,       0, AM_LONG_OP_NEEDED},
-		{"asexplicit",     		no_argument,   0, AM_LONG_OP_ASEXPLICIT},
-		{"arch",       			required_argument, 0, AM_LONG_OP_ARCH},
-		/* {"source",  			no_argument, 		0, AM_LONG_OP_SOURCE}, */
-		{"msearch",          	required_argument, 0, AM_LONG_OP_MSEARCH},
+		{"pacman",              no_argument,       0,  OP_PACMAN},
+		{"makepkg",             required_argument, 0,  OP_MAKEPKG},
+		{"aurman",              required_argument, 0,  OP_AURMAN},
+		{"vote",                required_argument, 0,  OP_VOTE},
+		{"unvote",              required_argument, 0,  OP_UNVOTE},
+		{"notify",              required_argument, 0,  OP_NOTIFY},
+		{"unnotify",            required_argument, 0,  OP_UNNOTIFY},
+		{"flag",                required_argument, 0,  OP_FLAG},
+		{"unflag",              required_argument, 0,  OP_UNFLAG},
+		{"adopt",               required_argument, 0,  OP_ADOPT},
+		{"disown",              required_argument, 0,  OP_DISOWN},
+		{"check",               required_argument, 0,  OP_CHECK},
+		{"checkoutofdate",      required_argument, 0,  OP_CHECKOUTOFDATE},
+		{"user",                required_argument, 0,  OP_USER},
+		{"pass",                required_argument, 0,  OP_PASS},
+		{"delete",              required_argument, 0,  OP_DELETE},
+		{"mypackages",          required_argument, 0,  OP_MYPACKAGES},
+		{"listcat",             no_argument,       0,  OP_LISTCAT},
+		{"pkgsubmit",           required_argument, 0,  OP_PKGSUBMIT},
+		{"category",            required_argument, 0,  OP_CATEGORY},
+		{"download",            required_argument, 0,  OP_DOWNLOAD},
+		{"comment",             required_argument, 0,  OP_COMMENT},
+		{"noconfirm",  			no_argument,       0, OP_NOCONFIRM},
+		{"config",     			required_argument, 0, OP_CONFIG},
+		{"ignore",     			required_argument, 0, OP_IGNORE},
+		{"debug",      			optional_argument, 0, OP_DEBUG},
+		{"noprogressbar", 		no_argument,    	0, OP_NOPROGRESSBAR},
+		{"noscriptlet", 		no_argument,      	0, OP_NOSCRIPTLET},
+		{"ask",        			required_argument, 0, OP_ASK},
+		{"cachedir",   			required_argument, 0, OP_CACHEDIR},
+		{"asdeps",     			no_argument,       0, OP_ASDEPS},
+		{"logfile",    			required_argument, 0, OP_LOGFILE},
+		{"ignoregroup", 		required_argument, 0, OP_IGNOREGROUP},
+		{"needed",     			no_argument,       0, OP_NEEDED},
+		{"asexplicit",     		no_argument,   0, OP_ASEXPLICIT},
+		{"arch",       			required_argument, 0, OP_ARCH},
+		/* {"source",  			no_argument, 		0, OP_SOURCE}, */
+		{"msearch",          	required_argument, 0, OP_MSEARCH},
 		{0, 0, 0, 0}
 	};
 
-	while((opt = getopt_long(argc, argv, "RUFQSTr:b:vkhscVfmnoldepqituwygz", opts, &option_index))) {
+	while((opt = getopt_long(argc, argv, "", opts, &option_index))) {
 		alam_list_t *list = NULL, *item = NULL; /* lists for splitting strings */
 
 		if(opt < 0) {
 			break;
 		}
 		switch(opt) {
-			case AM_LONG_OP_NOCONFIRM: config->noconfirm = 1; break;
-			case AM_LONG_OP_CONFIG:
+			case OP_NOCONFIRM: config->noconfirm = 1; break;
+			case OP_CONFIG:
 				if(config->configfile) {
 					free(config->configfile);
 				}
 				config->configfile = strndup(optarg, PATH_MAX);
 				break;
-			case AM_LONG_OP_IGNORE:
+			case OP_IGNORE:
 				list = strsplit(optarg, ',');
 				for(item = list; item; item = alam_list_next(item)) {
 					alam_option_add_ignorepkg((char *)alam_list_getdata(item));
 				}
 				FREELIST(list);
 				break;
-			case AM_LONG_OP_DEBUG:
+			case OP_DEBUG:
 				/* debug levels are made more 'human readable' than using a raw logmask
 				 * here, error and warning are set in config_new, though perhaps a
 				 * --quiet option will remove these later */
@@ -1410,97 +1410,97 @@ static int parseargs(int argc, char *argv[])
 				/* progress bars get wonky with debug on, shut them off */
 				config->noprogressbar = 1;
 				break;
-			case AM_LONG_OP_NOPROGRESSBAR: config->noprogressbar = 1; break;
-			case AM_LONG_OP_NOSCRIPTLET: config->flags |= AM_TRANS_FLAG_NOSCRIPTLET; break;
-			case AM_LONG_OP_ASK: config->noask = 1; config->ask = atoi(optarg); break;
-			case AM_LONG_OP_CACHEDIR:
+			case OP_NOPROGRESSBAR: config->noprogressbar = 1; break;
+			case OP_NOSCRIPTLET: config->flags |= AM_TRANS_FLAG_NOSCRIPTLET; break;
+			case OP_ASK: config->noask = 1; config->ask = atoi(optarg); break;
+			case OP_CACHEDIR:
 				if(alam_option_add_cachedir(optarg) != 0) {
 					am_printf(AM_LOG_ERROR, _("problem adding cachedir '%s' (%s)\n"),
 							optarg, alam_strerrorlast());
 					return(1);
 				}
 				break;
-			case AM_LONG_OP_ASDEPS:
+			case OP_ASDEPS:
 				config->flags |= AM_TRANS_FLAG_ALLDEPS;
 				break;
-			case AM_LONG_OP_LOGFILE:
+			case OP_LOGFILE:
 				config->logfile = strndup(optarg, PATH_MAX);
 				break;
-			case AM_LONG_OP_IGNOREGROUP:
+			case OP_IGNOREGROUP:
 				list = strsplit(optarg, ',');
 				for(item = list; item; item = alam_list_next(item)) {
 					alam_option_add_ignoregrp((char *)alam_list_getdata(item));
 				}
 				FREELIST(list);
 				break;
-			case AM_LONG_OP_NEEDED: config->flags |= AM_TRANS_FLAG_NEEDED; break;
-			case AM_LONG_OP_ASEXPLICIT:
+			case OP_NEEDED: config->flags |= AM_TRANS_FLAG_NEEDED; break;
+			case OP_ASEXPLICIT:
 				config->flags |= AM_TRANS_FLAG_ALLEXPLICIT;
 				break;
-			case AM_LONG_OP_ARCH:
+			case OP_ARCH:
 				setarch(optarg);
 				break;
 
-            case AM_LONG_OP_VOTE:
-                pkg_action_id = AM_LONG_OP_VOTE;
+            case OP_VOTE:
+                pkg_action_id = OP_VOTE;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_UNVOTE:
-                pkg_action_id = AM_LONG_OP_UNVOTE;
+            case OP_UNVOTE:
+                pkg_action_id = OP_UNVOTE;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_NOTIFY:
-                pkg_action_id = AM_LONG_OP_NOTIFY;
+            case OP_NOTIFY:
+                pkg_action_id = OP_NOTIFY;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_UNNOTIFY:
-                pkg_action_id = AM_LONG_OP_UNNOTIFY;
+            case OP_UNNOTIFY:
+                pkg_action_id = OP_UNNOTIFY;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_FLAG:
-                pkg_action_id = AM_LONG_OP_FLAG;
+            case OP_FLAG:
+                pkg_action_id = OP_FLAG;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_UNFLAG:
-                pkg_action_id = AM_LONG_OP_UNFLAG;
+            case OP_UNFLAG:
+                pkg_action_id = OP_UNFLAG;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_ADOPT:
-                pkg_action_id = AM_LONG_OP_ADOPT;
+            case OP_ADOPT:
+                pkg_action_id = OP_ADOPT;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_DISOWN:
-                pkg_action_id = AM_LONG_OP_DISOWN;
+            case OP_DISOWN:
+                pkg_action_id = OP_DISOWN;
                 pkg_name = strdup(optarg);
                 break;
-            case AM_LONG_OP_USER:
+            case OP_USER:
 				if(config->user) {
 					free(config->user);
 				}
                 config->user = strndup(optarg, PATH_MAX);
                 break;
-            case AM_LONG_OP_PASS:
+            case OP_PASS:
 				if(config->pass) {
 					free(config->pass);
 				}
                 config->pass = strndup(optarg, PATH_MAX);
                 break;
-            case AM_LONG_OP_PKGSUBMIT:
+            case OP_PKGSUBMIT:
                 config->am_pkgsubmit = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
 				break;
-            case AM_LONG_OP_CATEGORY:
+            case OP_CATEGORY:
 				config->category = strndup(optarg, PATH_MAX);
                 break;
-            case AM_LONG_OP_DOWNLOAD:
+            case OP_DOWNLOAD:
                 config->am_downloadonly = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
-            case AM_LONG_OP_COMMENT:
+            case OP_COMMENT:
                 config->am_comment = 1;
                 pkg_name = strndup(optarg, PATH_MAX);
                 break;
-            /* case AM_LONG_OP_SOURCE: */
+            /* case OP_SOURCE: */
 				/* config->source = 1; */
 				/* break; */
 			case 'h':
@@ -1509,10 +1509,10 @@ static int parseargs(int argc, char *argv[])
 			case 'V':
 				version();
 				break;
-			case AM_LONG_OP_LISTCAT:
+			case OP_LISTCAT:
 				list_cat();
 				break;
-			case AM_LONG_OP_MSEARCH:
+			case OP_MSEARCH:
 				config->maintainer = strndup(optarg, AM_USERNAME_MAX);
 				break;
 			case '?':
@@ -1535,7 +1535,7 @@ static int parseargs(int argc, char *argv[])
 /**
  * @brief Execute `--msearch' command.
  *
- * @param maintainer AUR username of maintainer whose packages are to be listed 
+ * @param maintainer AUR username of maintainer whose packages are to be listed
  * @return 0 success, others error
  *
  * Query AUR for packages maintained by given user and output them to stdout.
