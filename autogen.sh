@@ -1,6 +1,4 @@
 #!/bin/sh -xu
 
-aclocal
-autoheader
-automake --foreign
-autoconf
+autoreconf -fi;
+rm -Rf autom4te.cache;
