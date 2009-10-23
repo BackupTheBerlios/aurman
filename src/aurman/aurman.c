@@ -465,18 +465,6 @@ int findix_cat(char *category)
     return(ix+1);
 }
 
-//------------------------------------------------------------------
-bool file_exists(const char *filename)
-{
-    FILE *file = fopen(filename, "r");
-    if (file)
-    {
-        fclose(file);
-        return true;
-    }
-    return false;
-}
-
 //-------------------------------------------------------------------------
 size_t dummy_func(void *ptr, size_t size, size_t nmemb, void *stream)
 {
@@ -1615,36 +1603,6 @@ int am_aur (int argc, char *argv[])
 	if(ret != 0) {
 		cleanup(ret);
 	}
-
-    /* memset(tmp_str, 0, sizeof(tmp_str)); */
-    /* snprintf(tmp_str, sizeof(tmp_str), "%s/.aurman.conf", getenv("HOME")); */
-    /* if (!file_exists(tmp_str)) { */
-        /* printf("To create a new account just go to:"); */
-        /* printf("%s", aur_account_url); */
-        /* printf("You should create ~/.aurman.conf with inside:\n"); */
-        /* printf("user=YOUR_AUR_USERNAME\n"); */
-        /* printf("pass=YOUR_AUR_PASSWORD\n"); */
-        /* printf("download=YOUR_DOWNLOAD_LOCATION\n"); */
-        /* printf("to avoid manual input of these data.\n"); */
-        /* printf("Your AUR username: \n"); */
-        /* fgets(user, 200, stdin); */
-        /* printf("Your AUR password: \n"); */
-        /* fgets(pass, 200, stdin); */
-        /* printf("Your AUR location, to where to download the packages: \n"); */
-        /* fgets(pass, PATH_MAX, stdin); */
-    /* } else { // We will implement a better parser here */
-        /* aurman_conf_file = fopen(tmp_str, "r"); */
-        /* memset(tmp_str, 0, sizeof(tmp_str)); */
-        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
-        /* strncpy(user, &tmp_str[strlen("user=")], sizeof(user)); */
-        /* memset(tmp_str, 0, sizeof(tmp_str)); */
-        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
-        /* strncpy(pass, &tmp_str[strlen("pass=")], sizeof(pass)); */
-        /* memset(tmp_str, 0, sizeof(tmp_str)); */
-        /* fgets(tmp_str, sizeof(tmp_str), aurman_conf_file); */
-        /* strncpy(dl_location, &tmp_str[strlen("download=")], sizeof(pass)); */
-        /* fclose(aurman_conf_file); */
-    /* } */
 
     if (argv[1] != NULL) {
         snprintf(pkg_sample, sizeof(pkg_sample), "%s\",", pkg_name);
