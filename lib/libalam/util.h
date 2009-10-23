@@ -52,7 +52,6 @@
 	return(ret); } while(0)
 
 int _alam_makepath(const char *path);
-int _alam_makepath_mode(const char *path, mode_t mode);
 int _alam_copyfile(const char *src, const char *dest);
 char *_alam_strtrim(char *str);
 int _alam_lckmk();

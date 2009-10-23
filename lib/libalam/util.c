@@ -85,11 +85,11 @@
 
 int _alam_makepath(const char *path)
 {
-	return(_alam_makepath_mode(path, 0755));
+	return(alam_makepath_mode(path, 0755));
 }
 
 /* does the same thing as 'mkdir -p' */
-int _alam_makepath_mode(const char *path, mode_t mode)
+int SYMEXPORT alam_makepath_mode(const char *path, mode_t mode)
 {
 	/* A bit of pointer hell here. Descriptions:
 	 * orig - a copy of path so we can safely butcher it with strsep

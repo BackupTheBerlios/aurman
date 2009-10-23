@@ -445,7 +445,7 @@ int _alam_runscriptlet(const char *root, const char *installfn,
 	/* creates a directory in $root/tmp/ for copying/extracting the scriptlet */
 	snprintf(tmpdir, PATH_MAX, "%stmp/", root);
 	if(access(tmpdir, F_OK) != 0) {
-		_alam_makepath_mode(tmpdir, 01777);
+		alam_makepath_mode(tmpdir, 01777);
 	}
 	snprintf(tmpdir, PATH_MAX, "%stmp/alam_XXXXXX", root);
 	if(mkdtemp(tmpdir) == NULL) {

@@ -121,12 +121,12 @@ static int checkdbdir(amdb_t *db)
 	if(stat(path, &buf) != 0) {
 		_alam_log(AM_LOG_DEBUG, "database dir '%s' does not exist, creating it\n",
 				path);
-		if(_alam_makepath(path) != 0) {
+		if(alam_makepath(path) != 0) {
 			RET_ERR(AM_ERR_SYSTEM, -1);
 		}
 	} else if(!S_ISDIR(buf.st_mode)) {
 		_alam_log(AM_LOG_WARNING, "removing bogus database: %s\n", path);
-		if(unlink(path) != 0 || _alam_makepath(path) != 0) {
+		if(unlink(path) != 0 || alam_makepath(path) != 0) {
 			RET_ERR(AM_ERR_SYSTEM, -1);
 		}
 	}

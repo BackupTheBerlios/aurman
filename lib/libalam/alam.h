@@ -39,7 +39,7 @@ extern "C" {
  * Constants
  */
 #define AM_USERNAME_MAX 32
-	
+
 /*
  * Structures
  */
@@ -471,6 +471,8 @@ char *alam_compute_md5sum(const char *name);
 int alam_pack(const char *archive, const char *prefix, const char **fn);
 /* uncompress */
 int alam_unpack(const char *archive, const char *prefix, const char *fn);
+/* mkdir -p like implementation */
+int alam_makepath_mode(const char *path, mode_t mode);
 
 /*
  * Errors
