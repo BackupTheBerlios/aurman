@@ -1,3 +1,6 @@
+
+ACLOCAL_AMFLAGS = -I m4
+
 SUBDIRS =  lib/libalam src/util src/aurman scripts etc po contrib
 if WANT_DOC
 SUBDIRS += doc
