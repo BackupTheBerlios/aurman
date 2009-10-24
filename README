@@ -2,7 +2,7 @@ ALAM library overview & internals
 =================================
 
 Here is a list of the main objects and files from the ALAM (i.e. Arch Linux
-Package Management) library. This document, while not exhaustive, also
+AUR Management) library. This document, while not exhaustive, also
 indicates some limitations (on purpose, or sometimes due to its poor design) of
 the library at the present time.
 
