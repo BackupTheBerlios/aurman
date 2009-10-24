@@ -1,5 +1,6 @@
 Makefile
 Makefile.in
+/ABOUT-NLS
 /mkinstalldirs
 /aclocal.m4
 /autom4te.cache
@@ -12,6 +13,8 @@ Makefile.in
 /missing
 /stamp-h1
 
+.deps
+.libs
 *.o
 *.lo
 *.Po
